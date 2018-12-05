@@ -39,15 +39,13 @@ public class utils {
 	}
 
 	protected static String fromIntToDay(int i) {
-		String[] days_of_week = new String[] { "zeroDay", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-				"Friday", "Saturday" };
-		return days_of_week[i];
+		return (new String[] { "zeroDay", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })[i];
 	}
 
 	protected static HttpResponseMessage createWebhookResponseContent(String resultText,
 			HttpRequestMessage<Optional<String>> s) {
-		HttpResponseMessage resp = s
-				.createResponseBuilder(HttpStatus.OK).body(
+		return s.createResponseBuilder(
+				HttpStatus.OK).body(
 						new JSONObject().put("fulfillmentText", resultText)
 								.put("fulfillmentMessages", new JSONArray().put(new JSONObject().put("simpleResponses",
 										new JSONObject().put("simpleResponses",
@@ -58,8 +56,6 @@ public class utils {
 												new JSONObject().put("expectUserResponse", Boolean.TRUE)))
 								.toString().getBytes())
 				.header("Content-Type", "application/json; charset=UTF-8").header("Accept", "application/json").build();
-
-		return resp;
 	}
 
 }
