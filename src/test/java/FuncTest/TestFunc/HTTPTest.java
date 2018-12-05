@@ -1,6 +1,6 @@
 package FuncTest.TestFunc;
 
-import java.util.HashMap;
+//import java.util.HashMap;
 
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ import FuncTest.TestFunc.Function;
 public class HTTPTest {
 
 	
-	@Test
-	public void test() {
-	}
+//	@Test
+//	public void test() {
+//	}
 }
