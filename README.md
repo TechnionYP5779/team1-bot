@@ -1,2 +1,4 @@
-# team1-bot
-Repo of the bot idea for team 1
+The technion-bot
+ask it a question and wait for the relevant answer
+
+using dialogFlow and Azure
