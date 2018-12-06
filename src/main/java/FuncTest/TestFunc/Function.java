@@ -27,8 +27,6 @@ public class Function {
 			final ExecutionContext c) {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
-		// ===================================
-		// INVOKE RELEVANT INTENT_HANDLER
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
 		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
 			return getHourByDay(queryResult, s, c);
@@ -38,7 +36,6 @@ public class Function {
 			return getUpcomingHomework(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
-
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
