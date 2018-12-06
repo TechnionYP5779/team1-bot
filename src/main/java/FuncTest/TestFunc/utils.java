@@ -58,4 +58,18 @@ public class utils {
 				.header("Content-Type", "application/json; charset=UTF-8").header("Accept", "application/json").build();
 	}
 
+	//returns null is the parameter is missing
+	protected static String getUserParam(JSONObject queryResult, String paramName) {
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		return !parameters.has(paramName) ? null : parameters.getString(paramName);
+	}
+
+	
+	protected static String buildFilteringQuery(String facultyName) {
+		// TODO Auto-generated method stub
+		String q = "select name from dbo.Courses";		
+		if(facultyName != null) q += " where faculty = " + facultyName;
+		return q;
+	}
+	
 }
