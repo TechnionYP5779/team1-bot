@@ -74,10 +74,12 @@ public class Function {
 		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
 			for (int count = 1; resultSet.next();) {
-				jsonResult.append(count + " - " + resultSet.getString("name"));
+				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
+			resultSet.getString(2) + ")\n");
 				++count;
 			}
 		} catch (SQLException e) {
+			c.getLogger().info("=========== " + e.getMessage() + " ===========");
 			throw new RuntimeException();
 		}
 		
