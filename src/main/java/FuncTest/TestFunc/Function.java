@@ -14,6 +14,7 @@ import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import responses.TableResponse;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -128,7 +129,7 @@ public class Function {
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {
-			return utils.createWebhookResponseContent(homework.getUpcomingHomeworkAsString(), s);
+			return TableResponse.homeworkTableResponse(s, homework.getUpcomingHomework());
 		} catch (WrongCredentialsException e) {
 			return utils.createWebhookResponseContent("Wrong credentials, please try again", s);
 		}
