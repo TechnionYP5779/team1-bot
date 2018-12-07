@@ -43,11 +43,13 @@ public class Function {
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
 		c.getLogger().info("=========== FILTER COURSES BY PARAMS ===========");
 
-		String facultyName = utils.getUserParam(queryResult, "Faculty");
-		String query = utils.buildFilteringQuery(facultyName);
+		String facultyName = utils.getStringUserParamFromContext(queryResult, "Faculty");
+		String lectureHours = utils.getStringUserParamFromContext(queryResult, "lectureHours.original");
+		String query = utils.buildFilteringQuery(facultyName, lectureHours);
 		StringBuilder jsonResult = new StringBuilder();
 
 		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
+		c.getLogger().info("=========== lectureHours IS " + lectureHours + " ===========");
 		c.getLogger().info("=========== QUERY IS " + query + " ===========");
 
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {

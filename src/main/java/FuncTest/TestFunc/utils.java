@@ -65,19 +65,39 @@ public class utils {
 	}
 
 	
-	protected static String buildFilteringQuery(String facultyName) {
+	protected static String buildFilteringQuery(String facultyName, String lectureHours) {
 		// TODO Auto-generated method stub
 		String q = "select name, ID from dbo.Courses";		
 		if(isValidFaculty(facultyName)) q += " where faculty = " + quote(facultyName);
+		if(isValidNumber(lectureHours)) q += " and lectureHours = " + lectureHours;
 		return q;
 	}
 	
+	private static boolean isValidNumber(String lectureHours) {
+		// TODO Auto-generated method stub
+		try {
+			assert lectureHours != null && !"None".equals(lectureHours);
+			assert Integer.valueOf(lectureHours) >= 0;
+		} catch(Exception e) {
+			return false;
+		}
+		
+		return true;
+	}
+
 	private static boolean isValidFaculty(String facultyName) {
 		return facultyName != null && !"None".equals(facultyName);
 	}
 
 	private static String quote(String s) {
 		return "\'" + s + "\'";
+	}
+
+	//param must be string!
+	public static String getStringUserParamFromContext(JSONObject queryResult, String paramName) {
+		JSONArray outputContexts = queryResult.getJSONArray("outputContexts");
+		JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
+		return !parameters.has(paramName) ? null : parameters.getString(paramName);
 	}
 	
 }
