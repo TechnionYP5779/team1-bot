@@ -68,8 +68,12 @@ public class utils {
 	protected static String buildFilteringQuery(String facultyName) {
 		// TODO Auto-generated method stub
 		String q = "select name from dbo.Courses";		
-		if(facultyName != null) q += " where faculty = " + facultyName;
+		if(facultyName != null) q += " where faculty = " + quote(facultyName);
 		return q;
+	}
+	
+	private static String quote(String s) {
+		return "\'" + s + "\'";
 	}
 	
 }

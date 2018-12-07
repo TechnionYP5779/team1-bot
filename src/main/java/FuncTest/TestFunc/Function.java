@@ -45,33 +45,44 @@ public class Function {
 
 		String facultyName = utils.getUserParam(queryResult, "Faculty");
 		String query = utils.buildFilteringQuery(facultyName);
+		StringBuilder jsonResult = new StringBuilder();
 
 		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
+		c.getLogger().info("=========== QUERY IS " + query + " ===========");
 
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			StringBuilder jsonResult = new StringBuilder();
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
-			if (resultSet.isBeforeFirst())
-				parseFilterResults(resultSet, jsonResult);
-			else
+			if (!resultSet.isBeforeFirst()) {
+				c.getLogger().info("=========== NO RESULTS ===========");
 				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			} else {
+				c.getLogger().info("=========== FOUND RESULTS ===========");
+				jsonResult = parseFilterResults(resultSet, jsonResult, c);
+			}
+			
 			connection.close();
-
+			c.getLogger().info("=========== RETURNING RESULTS ===========");
 			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+			
 		} catch (Exception e) {
+			c.getLogger().info("=========== " + e.getMessage() + " ===========");
 			throw new RuntimeException();
 		}
 	}
 
-	private void parseFilterResults(ResultSet resultSet, StringBuilder jsonResult) {
+	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
+		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
 			for (int count = 1; resultSet.next();) {
-				jsonResult.append(count + ") " + resultSet.getString("name"));
+				jsonResult.append(count + " - " + resultSet.getString("name"));
 				++count;
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException();
 		}
+		
+		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
+		return jsonResult;
 
 	}
 
