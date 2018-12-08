@@ -65,24 +65,17 @@ public class utils {
 	}
 
 	
-	protected static String buildFilteringQuery(String facultyName, String lectureHours) {
-		// TODO Auto-generated method stub
+	protected static String buildFilteringQuery(String facultyName, Integer lectureHours
+			, Integer tutorialHours) {
 		String q = "select name, ID from dbo.Courses";		
 		if(isValidFaculty(facultyName)) q += " where faculty = " + quote(facultyName);
 		if(isValidNumber(lectureHours)) q += " and lectureHours = " + lectureHours;
+		if(isValidNumber(tutorialHours)) q += " and tutorialHours = " + tutorialHours;
 		return q;
 	}
 	
-	private static boolean isValidNumber(String lectureHours) {
-		// TODO Auto-generated method stub
-		try {
-			assert lectureHours != null && !"None".equals(lectureHours);
-			assert Integer.valueOf(lectureHours) >= 0;
-		} catch(Exception e) {
-			return false;
-		}
-		
-		return true;
+	private static boolean isValidNumber(Integer lectureHours) {
+		return lectureHours != null && lectureHours.intValue() >= 0;
 	}
 
 	private static boolean isValidFaculty(String facultyName) {
@@ -99,5 +92,13 @@ public class utils {
 		JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
 		return !parameters.has(paramName) ? null : parameters.getString(paramName);
 	}
+	
+	//param must be a number!
+		public static Integer getIntUserParamFromContext(JSONObject queryResult, String paramName) {
+			JSONArray outputContexts = queryResult.getJSONArray("outputContexts");
+			JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
+			return !parameters.has(paramName) ? null : parameters.getInt(paramName);
+		}
+		
 	
 }

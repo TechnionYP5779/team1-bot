@@ -44,12 +44,14 @@ public class Function {
 		c.getLogger().info("=========== FILTER COURSES BY PARAMS ===========");
 
 		String facultyName = utils.getStringUserParamFromContext(queryResult, "Faculty");
-		String lectureHours = utils.getStringUserParamFromContext(queryResult, "lectureHours.original");
-		String query = utils.buildFilteringQuery(facultyName, lectureHours);
+		Integer lectureHours = utils.getIntUserParamFromContext(queryResult, "lectureHours");
+		Integer tutorialHours = utils.getIntUserParamFromContext(queryResult, "tutorialHours");
+		String query = utils.buildFilteringQuery(facultyName, lectureHours, tutorialHours);
 		StringBuilder jsonResult = new StringBuilder();
 
 		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
 		c.getLogger().info("=========== lectureHours IS " + lectureHours + " ===========");
+		c.getLogger().info("=========== tutorialHours IS " + tutorialHours + " ===========");
 		c.getLogger().info("=========== QUERY IS " + query + " ===========");
 
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
@@ -59,6 +61,7 @@ public class Function {
 				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
 			} else {
 				c.getLogger().info("=========== FOUND RESULTS ===========");
+				jsonResult.append("Here's what I found:\n");
 				jsonResult = parseFilterResults(resultSet, jsonResult, c);
 			}
 			
