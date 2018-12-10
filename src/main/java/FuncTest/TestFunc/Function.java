@@ -14,6 +14,7 @@ import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import responses.TableResponse;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -27,8 +28,6 @@ public class Function {
 			final ExecutionContext c) {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
-		// ===================================
-		// INVOKE RELEVANT INTENT_HANDLER
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
 		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
 			return getHourByDay(queryResult, s, c);
@@ -38,7 +37,6 @@ public class Function {
 			return getUpcomingHomework(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
-
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
@@ -131,7 +129,7 @@ public class Function {
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {
-			return utils.createWebhookResponseContent(homework.getUpcomingHomeworkAsString(), s);
+			return TableResponse.homeworkTableResponse(s, homework.getUpcomingHomework());
 		} catch (WrongCredentialsException e) {
 			return utils.createWebhookResponseContent("Wrong credentials, please try again", s);
 		}
