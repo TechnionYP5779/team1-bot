@@ -2,6 +2,7 @@ package FuncTest.TestFunc;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import org.json.JSONArray;
@@ -40,6 +41,10 @@ public class utils {
 
 	protected static String fromIntToDay(int i) {
 		return (new String[] { "zeroDay", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })[i];
+	}
+	
+	protected static boolean allParametersArePresent(JSONObject parameters, Collection<String> paremeterNames) {
+		return paremeterNames.stream().allMatch(paramName -> parameters.has(paramName));
 	}
 
 	protected static HttpResponseMessage createWebhookResponseContent(String resultText,

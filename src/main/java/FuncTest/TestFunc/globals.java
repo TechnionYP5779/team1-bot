@@ -8,6 +8,8 @@ public class globals {
 	public static final String BUSINESS_HOUR_WEEK_INTENT_NAME = "technion.businesses.fullweek";
 	public static final String FILTER_COURSES_INTENT_NAME = "technion.courses.filter - examA";
 	// globals for business search
+	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
+	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
 	public static final String MISSING_DAY_PARAM = "Please specify a day\n";
