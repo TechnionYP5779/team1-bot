@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
@@ -36,6 +37,8 @@ public class Function {
 			return getHourByWeek(queryResult, s, c);
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
+		case globals.COURSES_GET_PREREQUISITES_INTENT_NAME:
+			return getCoursesPrerequisites(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 

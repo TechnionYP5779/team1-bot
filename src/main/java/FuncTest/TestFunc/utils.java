@@ -62,5 +62,22 @@ public class utils {
 								.toString().getBytes())
 				.header("Content-Type", "application/json; charset=UTF-8").header("Accept", "application/json").build();
 	}
+	
+	private static String quote(String s) {
+		return "\'" + s + "\'";
+	}
 
+	protected static String buildPrerequisitesQueryByName(String courseName) {
+		String q = "select prerequisites from dbo.Courses";		
+		if(courseName != null) q += " where name = " + courseName;
+		if(courseName != null) q += " where name = " + quote(courseName);
+		return q;
+	}
+	
+	protected static String buildPrerequisitesQueryByNumber(String courseNumber) {
+		String q = "select prerequisites from dbo.Courses";		
+		if(courseNumber != null) q += " where number = " + courseNumber;
+		if(courseNumber != null) q += " where number = " + quote(courseNumber);
+		return q;
+	}
 }
