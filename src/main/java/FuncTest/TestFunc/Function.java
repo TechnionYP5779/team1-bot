@@ -35,6 +35,10 @@ public class Function {
 			return getHourByWeek(queryResult, s, c);
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
+		case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
+			// return getPostrequisitesByName(queryResult, s, c);
+		case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
+			// return getPostrequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
@@ -123,9 +127,9 @@ public class Function {
 		List<String> requiredParameterNames = new ArrayList<>();
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
 			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
-		
+
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {
@@ -134,7 +138,5 @@ public class Function {
 			return utils.createWebhookResponseContent("Wrong credentials, please try again", s);
 		}
 	}
-
-	
 
 }
