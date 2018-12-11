@@ -7,7 +7,8 @@ public class globals {
 	public static final String BUSINESS_HOUR_BY_DAY_INTENT_NAME = "technion.businesses.getSpecific";
 	public static final String BUSINESS_HOUR_WEEK_INTENT_NAME = "technion.businesses.fullweek";
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
-	public static final String COURSES_GET_PREREQUISITES_INTENT_NAME = "technion.courses.filter - getPrerequisites";
+	public static final String PREREQUISITES_GET_BY_NAME_INTENT_NAME = "technion.courses.filter - getPrerequisitesByName";
+	public static final String PREREQUISITES_GET_BY_NUMBER_INTENT_NAME = "technion.courses.filter - getPrerequisitesByNumber";
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";

@@ -28,8 +28,6 @@ public class Function {
 			final ExecutionContext c) {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
-		// ===================================
-		// INVOKE RELEVANT INTENT_HANDLER
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
 		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
 			return getHourByDay(queryResult, s, c);
@@ -37,11 +35,64 @@ public class Function {
 			return getHourByWeek(queryResult, s, c);
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
-		case globals.COURSES_GET_PREREQUISITES_INTENT_NAME:
-			return getCoursesPrerequisites(queryResult, s, c);
+		case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
+			return getCoursesPrerequisitesByName(queryResult, s, c);
+		case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
+			return getCoursesPrerequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 
+	}
+	
+	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
+		String courseName = utils.getUserParam(queryResult, "Name"),
+				query = utils.buildPrerequisitesQueryByName(courseName);
+		c.getLogger().info("=========== COURSE NAME IS " + courseName + " ===========");
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder jsonResult = new StringBuilder();
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (resultSet.isBeforeFirst())
+				parseFilterResults(resultSet, jsonResult);
+			else
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			connection.close();
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	private HttpResponseMessage getCoursesPrerequisitesByNumber(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
+		Integer courseNumber = utils.getIntUserParamFromContext(queryResult, "Number");
+		String query = utils.buildPrerequisitesQueryByNumber(courseNumber);
+		c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder jsonResult = new StringBuilder();
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (resultSet.isBeforeFirst())
+				parseFilterResults(resultSet, jsonResult);
+			else
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			connection.close();
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	private void parseFilterResults(ResultSet resultSet, StringBuilder jsonResult) {
+		try {
+			for (int count = 1; resultSet.next();) {
+				jsonResult.append(count + ") " + resultSet.getString("name"));
+				++count;
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException();
+		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,

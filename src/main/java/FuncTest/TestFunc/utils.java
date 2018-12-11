@@ -74,10 +74,20 @@ public class utils {
 		return q;
 	}
 	
-	protected static String buildPrerequisitesQueryByNumber(String courseNumber) {
+	protected static String buildPrerequisitesQueryByNumber(Integer courseNumber) {
 		String q = "select prerequisites from dbo.Courses";		
-		if(courseNumber != null) q += " where number = " + courseNumber;
-		if(courseNumber != null) q += " where number = " + quote(courseNumber);
+		if(courseNumber != null) q += " where ID = " + courseNumber;
 		return q;
+	}
+	
+	//returns null if the parameter is missing
+	protected static String getUserParam(JSONObject queryResult, String paramName) {
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		return !parameters.has(paramName) ? null : parameters.getString(paramName);
+	}
+		
+	public static Integer getIntUserParamFromContext(JSONObject queryResult, String paramName) {
+		JSONObject parameters = queryResult.getJSONArray("outputContexts").getJSONObject(0).getJSONObject("parameters");
+		return !parameters.has(paramName) ? null : parameters.getInt(paramName);
 	}
 }
