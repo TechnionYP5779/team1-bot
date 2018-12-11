@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
+
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
@@ -38,9 +40,32 @@ public class Function {
 		case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
 			// return getPostrequisitesByName(queryResult, s, c);
 		case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
-			// return getPostrequisitesByNumber(queryResult, s, c);
+			return getPostrequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
+	}
+
+	private HttpResponseMessage getPostrequisitesByNumber(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		List<String> requiredParameterNames = new ArrayList<>();
+		requiredParameterNames.add("courseNum");
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
+			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
+
+		int courseNum = parameters.getInt("courseNum");
+
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			ResultSet resultSet = connection.createStatement()
+					.executeQuery("SELECT PostrequisiteID FROM dbo.Postrequisites WHERE CourseID = " + courseNum);
+			List<String> postreqList = new ArrayList<>();
+			while (resultSet.next())
+				postreqList.add(resultSet.getString(1));
+			return utils.createWebhookResponseContent("The postrequisites are: " + postreqList.toString(), s);
+		} catch (SQLException e) {
+			return utils.createWebhookResponseContent("SQL Exception. Please report this", s);
+		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
