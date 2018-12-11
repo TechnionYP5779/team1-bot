@@ -66,14 +66,21 @@ public class utils {
 
 	
 	protected static String buildFilteringQuery(String facultyName, Integer lectureHours
-			, Integer tutorialHours) {
-		String q = "select name, ID from dbo.Courses";		
-		if(isValidFaculty(facultyName)) q += " where faculty = " + quote(facultyName);
+			, Integer tutorialHours, String dateRangeA[]) {
+		String q = "select name, ID from dbo.Courses where 1 = 1";
+		
+		if(isValidFaculty(facultyName)) q += " and faculty = " + quote(facultyName);
 		if(isValidNumber(lectureHours)) q += " and lectureHours = " + lectureHours;
 		if(isValidNumber(tutorialHours)) q += " and tutorialHours = " + tutorialHours;
+		if(isValidDateRange(dateRangeA)) q += " and examA between '" + dateRangeA[0] + "' and '"+ dateRangeA[1] +"'";
 		return q;
 	}
 	
+	private static boolean isValidDateRange(String[] dateRange) {
+		// TODO Auto-generated method stub
+		return (dateRange != null);
+	}
+
 	private static boolean isValidNumber(Integer lectureHours) {
 		return lectureHours != null && lectureHours.intValue() >= 0;
 	}
@@ -94,11 +101,24 @@ public class utils {
 	}
 	
 	//param must be a number!
-		public static Integer getIntUserParamFromContext(JSONObject queryResult, String paramName) {
-			JSONArray outputContexts = queryResult.getJSONArray("outputContexts");
-			JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
-			return !parameters.has(paramName) ? null : parameters.getInt(paramName);
-		}
+	public static Integer getIntUserParamFromContext(JSONObject queryResult, String paramName) {
+		JSONArray outputContexts = queryResult.getJSONArray("outputContexts");
+		JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
+		return !parameters.has(paramName) ? null : parameters.getInt(paramName);
+	}
+	
+	//paramName is probably date-period
+	public static String[] getDateRange(JSONObject queryResult, String paramName){
+		JSONArray outputContexts = queryResult.getJSONArray("outputContexts");
+		JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
+		if(!parameters.has(paramName)) return null;
+		
+		JSONObject dateJSON = parameters.getJSONObject(paramName);
+		String from = dateJSON.getString("startDate");
+		String to = dateJSON.getString("endDate");
+		
+		return new String[] {from.substring(0, from.indexOf("T")), to.substring(0, from.indexOf("T"))};
+	}
 		
 	
 }

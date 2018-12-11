@@ -46,12 +46,15 @@ public class Function {
 		String facultyName = utils.getStringUserParamFromContext(queryResult, "Faculty");
 		Integer lectureHours = utils.getIntUserParamFromContext(queryResult, "lectureHours");
 		Integer tutorialHours = utils.getIntUserParamFromContext(queryResult, "tutorialHours");
-		String query = utils.buildFilteringQuery(facultyName, lectureHours, tutorialHours);
+		String dateA[] = utils.getDateRange(queryResult, "date-period");
+		
+		String query = utils.buildFilteringQuery(facultyName, lectureHours, tutorialHours, dateA);
 		StringBuilder jsonResult = new StringBuilder();
 
 		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
 		c.getLogger().info("=========== lectureHours IS " + lectureHours + " ===========");
 		c.getLogger().info("=========== tutorialHours IS " + tutorialHours + " ===========");
+		c.getLogger().info("=========== dateRangeA IS " + dateA[0] + " to " + dateA[1] + " ===========");
 		c.getLogger().info("=========== QUERY IS " + query + " ===========");
 
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
