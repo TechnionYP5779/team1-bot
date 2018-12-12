@@ -68,16 +68,11 @@ public class utils {
 	}
 
 	protected static String buildPrerequisitesQueryByName(String courseName) {
-		String q = "select prerequisites from dbo.Courses";		
-		if(courseName != null) q += " where name = " + courseName;
-		if(courseName != null) q += " where name = " + quote(courseName);
-		return q;
+		return "select prereq from dbo.Courses" + (courseName == null ? "" : " where name = " + quote(courseName));
 	}
 	
 	protected static String buildPrerequisitesQueryByNumber(Integer courseNumber) {
-		String q = "select prerequisites from dbo.Courses";		
-		if(courseNumber != null) q += " where ID = " + courseNumber;
-		return q;
+		return "select prereq from dbo.Courses" + (courseNumber == null ? "" : " where id = " + courseNumber);
 	}
 	
 	//returns null if the parameter is missing
