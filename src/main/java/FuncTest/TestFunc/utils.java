@@ -122,7 +122,9 @@ public class utils {
 		String from = dateJSON.getString("startDate");
 		String to = dateJSON.getString("endDate");
 		
-		return new String[] {from.substring(0, from.indexOf("T")), to.substring(0, from.indexOf("T"))};
+		return new String[] {from.substring(0, from.indexOf("T")),
+				to.substring(0, to.indexOf("T"))};
+		
 	}
 		
 	
