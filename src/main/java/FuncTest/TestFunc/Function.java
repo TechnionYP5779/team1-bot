@@ -2,6 +2,7 @@ package FuncTest.TestFunc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -57,14 +58,11 @@ public class Function {
 		int courseNum = parameters.getInt("courseNum");
 
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			String subquery = "SELECT PostrequisiteID FROM dbo.Postrequisites WHERE CourseID = " + courseNum;
-			ResultSet resultSet = connection.createStatement()
-					.executeQuery("");
-			List<String> postreqList = new ArrayList<>();
-			while (resultSet.next())
-				postreqList.add(resultSet.getString(1));
-			return utils.createWebhookResponseContent("The postrequisites are: " + postreqList.toString(), s);
+			PreparedStatement ps = connection.prepareStatement("Select ID,Name From ( SELECT PostrequisiteID FROM Postrequisites WHERE CourseID = ? ) as PostIDs LEFT JOIN Courses ON PostIDs.PostrequisiteID = Courses.ID;");
+			ps.setInt(1, courseNum);
+			return TableResponse.quaryTableResponse(s, "The postrequisites are:", ps.executeQuery());
 		} catch (SQLException e) {
+			e.printStackTrace();
 			return utils.createWebhookResponseContent("SQL Exception. Please report this", s);
 		}
 	}
