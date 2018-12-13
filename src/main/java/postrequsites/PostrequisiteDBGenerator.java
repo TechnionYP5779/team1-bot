@@ -2,6 +2,7 @@ package postrequsites;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -48,14 +49,19 @@ public class PostrequisiteDBGenerator {
 		}
 	}
 
-	private static void insertPostrequisiteToDB(Connection c, Pair<String, String> postreqPair) {
-		String insertIntoQuery = "INSERT INTO " + postrequisitesDBName + " VALUES " + postreqPair.toString() + ";";
+	private static void addPairToBatchInsert(PreparedStatement s, Pair<String, String> postreqPair) {
 		try {
-			c.createStatement().executeUpdate(insertIntoQuery);
+			s.setInt(1, Integer.parseInt(postreqPair.getLeft()));
+			s.setInt(2, Integer.parseInt(postreqPair.getRight()));
+			s.addBatch();
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 	}
 
 	public static void generate() {
@@ -64,7 +70,10 @@ public class PostrequisiteDBGenerator {
 			Set<Pair<String, String>> coursesPostrequisites = getAllCoursesPostrequisites();
 			System.out.println(coursesPostrequisites);
 			try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-				coursesPostrequisites.forEach(pair -> insertPostrequisiteToDB(connection, pair));
+				PreparedStatement ps = connection
+						.prepareStatement("INSERT INTO " + postrequisitesDBName + " VALUES ( ? , ? );");
+				coursesPostrequisites.forEach(pair -> addPairToBatchInsert(ps, pair));
+				ps.executeBatch();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

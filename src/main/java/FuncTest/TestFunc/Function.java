@@ -57,8 +57,9 @@ public class Function {
 		int courseNum = parameters.getInt("courseNum");
 
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			String subquery = "SELECT PostrequisiteID FROM dbo.Postrequisites WHERE CourseID = " + courseNum;
 			ResultSet resultSet = connection.createStatement()
-					.executeQuery("SELECT PostrequisiteID FROM dbo.Postrequisites WHERE CourseID = " + courseNum);
+					.executeQuery("");
 			List<String> postreqList = new ArrayList<>();
 			while (resultSet.next())
 				postreqList.add(resultSet.getString(1));
