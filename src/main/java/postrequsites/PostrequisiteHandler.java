@@ -100,7 +100,10 @@ public class PostrequisiteHandler {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			PreparedStatement ps = connection.prepareStatement("Select ID,Name From ( SELECT PostrequisiteID FROM Postrequisites WHERE CourseID = ? ) as PostIDs LEFT JOIN Courses ON PostIDs.PostrequisiteID = Courses.ID;");
 			ps.setInt(1, c.getId());
-			return TableResponse.quaryTableResponse(s, "The postrequisites for " + c.getName() +" are:", ps.executeQuery());
+			ResultSet rs = ps.executeQuery();
+			if(!rs.isBeforeFirst()) 
+				return utils.createWebhookResponseContent("There are no postrequisites for " +c.getName()+ "." , s);
+			return TableResponse.quaryTableResponse(s, "The postrequisites for " + c.getName() +" are:", rs);
 		}
 	}
 }
