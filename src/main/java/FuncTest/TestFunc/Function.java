@@ -2,10 +2,8 @@ package FuncTest.TestFunc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
@@ -17,6 +15,7 @@ import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import postrequsites.PostrequisiteHandler;
 import responses.TableResponse;
 
 /**
@@ -39,32 +38,11 @@ public class Function {
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
 		case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
-			// return getPostrequisitesByName(queryResult, s, c);
+			 return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
 		case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
-			return getPostrequisitesByNumber(queryResult, s, c);
+			return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
-	}
-
-	private HttpResponseMessage getPostrequisitesByNumber(JSONObject queryResult,
-			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
-
-		JSONObject parameters = queryResult.getJSONObject("parameters");
-		List<String> requiredParameterNames = new ArrayList<>();
-		requiredParameterNames.add("courseNum");
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
-			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
-
-		int courseNum = parameters.getInt("courseNum");
-
-		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement ps = connection.prepareStatement("Select ID,Name From ( SELECT PostrequisiteID FROM Postrequisites WHERE CourseID = ? ) as PostIDs LEFT JOIN Courses ON PostIDs.PostrequisiteID = Courses.ID;");
-			ps.setInt(1, courseNum);
-			return TableResponse.quaryTableResponse(s, "The postrequisites are:", ps.executeQuery());
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return utils.createWebhookResponseContent("SQL Exception. Please report this", s);
-		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,

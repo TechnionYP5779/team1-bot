@@ -19,8 +19,6 @@ import FuncTest.TestFunc.globals;
 public class PostrequisiteDBGenerator {
 	private static final String courseInfoDBName = "dbo.Courses";
 	private static final String postrequisitesDBName = "dbo.Postrequisites";
-	private static final int prerequisitesIndex = 11;
-	private static final int courseNumIndex = 3;
 
 	private static String genImportCoursesDBQuery() {
 		return "select * from " + courseInfoDBName;
@@ -43,8 +41,8 @@ public class PostrequisiteDBGenerator {
 			ResultSet resultSet = connection.createStatement().executeQuery(genImportCoursesDBQuery());
 			Set<Pair<String, String>> postrequisitePairs = new HashSet<>();
 			while (resultSet.next())
-				postrequisitePairs.addAll(parsePrerequisitesAsPostrequisitePairs(resultSet.getString(courseNumIndex),
-						resultSet.getString(prerequisitesIndex)));
+				postrequisitePairs.addAll(parsePrerequisitesAsPostrequisitePairs(resultSet.getString("Name"),
+						resultSet.getString(resultSet.findColumn("Prereq"))));
 			return postrequisitePairs;
 		}
 	}
