@@ -119,8 +119,12 @@
 		    <artifactId>google-oauth-client-jetty</artifactId>
 		    <version>1.23.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-calendar</artifactId>
+			<version>v3-rev364-1.25.0</version>
+		</dependency>
 		
-				
      	<dependency>
 		    <groupId>net.sourceforge.htmlunit</groupId>
 		    <artifactId>htmlunit</artifactId>
