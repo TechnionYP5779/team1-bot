@@ -35,6 +35,8 @@ public class Function {
 			return getHourByWeek(queryResult, s, c);
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
+		case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
+			return VideoAnswers.checkExists(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}

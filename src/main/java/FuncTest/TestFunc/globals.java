@@ -7,6 +7,7 @@ public class globals {
 	public static final String BUSINESS_HOUR_BY_DAY_INTENT_NAME = "technion.businesses.getSpecific";
 	public static final String BUSINESS_HOUR_WEEK_INTENT_NAME = "technion.businesses.fullweek";
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
+	public static final String VIDEOS_CHECK_EXISTS_INTENT_NAME = "technion.courses.video.checkexistance";
 	public static final String TEST_INTENT = "testIntent";
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
@@ -16,4 +17,7 @@ public class globals {
 			"jdbc:sqlserver://%s:1433;database=%s;user=%s;password=%s;encrypt=true;"
 					+ "hostNameInCertificate=*.database.windows.net;loginTimeout=30;",
 			"technobotserver.database.windows.net", "technobot", "techazure2@technobotserver", "TechnionBot1234");
+	public static final Object NO_VIDEO_FOUND_ERROR = "No videos where found. It could be that the course-number does represent an actual course"
+			+ ", or perhaps no video was recorded";
+	
 }
