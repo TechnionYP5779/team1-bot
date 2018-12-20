@@ -1,5 +1,6 @@
 package FuncTest.TestFunc;
 
+import google.tasks.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,6 +12,7 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import google.tasks.GoogleTasksAPI;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
@@ -35,6 +37,9 @@ public class Function {
 			return getHourByWeek(queryResult, s, c);
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
+		case globals.TEST_INTENT:
+			GoogleTasksAPI.addNewTask(new TaskBuilder().setTitle("Test Task from Azure").build());
+			return utils.createWebhookResponseContent("added tasks", s);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}

@@ -31,7 +31,7 @@ public class GoogleTasksAPI {
 	 * scopes, delete your previously saved tokens/ folder.
 	 */
 	private static final List<String> SCOPES = Collections.singletonList(TasksScopes.TASKS);
-	private static final String CREDENTIALS_FILE_PATH = "credentials.json";
+	private static final String CREDENTIALS_FILE_PATH = "azureCred.json";
 
 	/**
 	 * Creates an authorized Credential object.
