@@ -23,8 +23,7 @@ public class DataToDBLoader {
 		try {
 			Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING);
 			PreparedStatement pstmt;
-			pstmt = connection
-					.prepareStatement("INSERT INTO Courses VALUES(? ,? ,? ,? ,? ,?, ? ,? ,? ,? ,? ,?)");
+			pstmt = connection.prepareStatement("INSERT INTO Courses VALUES(? ,? ,? ,? ,? ,?, ? ,? ,? ,? ,? ,?)");
 			JSONArray courses = JsonReader.ReadJsonFromFile(jsonName);
 			for (int c = 0; c < courses.length(); ++c) {
 				JSONObject course = courses.getJSONObject(c);
@@ -48,7 +47,7 @@ public class DataToDBLoader {
 				 */
 
 				try {
-					
+
 					pstmt.setString(1, facultyName);
 					pstmt.setString(2, courseName);
 					pstmt.setInt(3, courseId.intValue());
