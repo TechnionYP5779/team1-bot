@@ -40,6 +40,7 @@ public class CourseObject {
   private Optional<ExamDate> examB = Optional.empty();
   private Optional<String> preqisute = Optional.empty();
   private Optional<String> linked = Optional.empty();
+private String description;
   
   public CourseObject() {
     name  = id ="N\\A";
@@ -246,5 +247,15 @@ public class CourseObject {
   public void setLinked(Optional<String> linked) {
     this.linked = linked;
   }
+
+public void setDescription(String text) {
+	this.description = text;
+	
+}
+
+public String getDescription() {
+	return description;
+	
+}
 
 }

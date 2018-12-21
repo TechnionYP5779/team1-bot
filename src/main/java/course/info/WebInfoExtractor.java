@@ -95,7 +95,31 @@ public class WebInfoExtractor {
     return $;
     
   }
-
+  public static void getCourseDescriptionToJSON(String filename) {
+	  //
+	  SimpleWebParser par = new SimpleWebParser();
+	  List<CourseObject> $ = toCourseObjectList();
+	    for (CourseObject ¢ : $ ) {
+	      String siteURL = SITE_PREFIX + ¢.getId();
+	      ¢.setName(ExctractName(par.getListOfTagsHead(siteURL, "title"), ¢.getId()));
+	      ¢.setDescription(par.getListOfClasses(siteURL, "syl").get(0).text());
+	    }	
+	
+		 
+		JSONArray courses = new JSONArray();
+		for (CourseObject ¢ : $ ) {
+			 JSONObject obj = new JSONObject();
+			 obj.put("id", ¢.getId());
+			 obj.put("Title+Desc", ¢.getName() + " " + ¢.getDescription());
+			 courses.put(obj);
+		}	
+		
+		try {
+			courses.write( new FileWriter(filename));
+		} catch (JSONException | IOException e) {
+			e.printStackTrace();
+		}
+  }
   
   private static String turnToUniformLinked(String linked) {
     return linked.replaceAll(" ","&");
@@ -185,6 +209,11 @@ public class WebInfoExtractor {
       }
       
     }
+  }
+  public static void main (String [] args) {
+	  System.out.println("In main");
+//	  WebInfoExtractor.writeCsvFile("courseInfo.csv", WebInfoExtractor.getCourseData());
+	  getCourseDescriptionToJSON("CourseDesc.json");
   }
 
 }
