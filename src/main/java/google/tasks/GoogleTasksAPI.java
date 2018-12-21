@@ -3,7 +3,9 @@ package google.tasks;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
@@ -25,13 +28,14 @@ public class GoogleTasksAPI {
 	private static final String APPLICATION_NAME = "Google Tasks API Java Quickstart";
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String TOKENS_DIRECTORY_PATH = "tokens";
-
 	/**
 	 * Global instance of the scopes required by this quickstart. If modifying these
 	 * scopes, delete your previously saved tokens/ folder.
 	 */
 	private static final List<String> SCOPES = Collections.singletonList(TasksScopes.TASKS);
-	private static final String CREDENTIALS_FILE_PATH = "azureCred.json";
+	private static final String CREDENTIALS_FILE_PATH = "credentials.json";
+
+	private static Tasks service = setupService();
 
 	/**
 	 * Creates an authorized Credential object.
@@ -63,9 +67,41 @@ public class GoogleTasksAPI {
 		}
 	}
 
+	private static Task findTask(String title) {
+		try {
+			return service.tasks().list("@default").execute().getItems().stream()
+					.filter(t -> t.getTitle().equals(title)).findFirst().orElse(null);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void updateTask(String title, Task newTask) {
+		try {
+			service.tasks().delete("@default", findTask(title).getId()).execute();
+			addNewTask(newTask);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void completeTask(String title) {
+		try {
+//			service.tasks().delete("@default", task.getId()).execute();
+//			addNewTask(task.setStatus("completed"));
+			Task task = findTask(title);
+			task.setStatus("completed");
+			service.tasks().update("@default", task.getId(), task).execute();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public static void addNewTask(Task task) {
-		Tasks service = setupService();
-		assert service != null;
 		try {
 			service.tasks().insert("@default", task).execute();
 		} catch (IOException e) {
@@ -75,8 +111,6 @@ public class GoogleTasksAPI {
 	}
 
 	public static List<Task> listAllTasks() {
-		Tasks service = setupService();
-		assert service != null;
 		try {
 			return service.tasks().list("@default").execute().getItems();
 		} catch (IOException e) {
@@ -86,12 +120,8 @@ public class GoogleTasksAPI {
 		}
 	}
 
-//	public static void main(String... args) {
-//		 Build a new authorized API client service.
-//
-//		com.google.api.services.tasks.model.Tasks tasks = service.tasks()
-//				.list(service.tasklists().list().setMaxResults(10L).execute().getItems().get(0).getId()).execute();
-//		tasks.getItems().stream().forEach(t -> System.out.println(t.getTitle()));
-//		System.out.println("Done!");
-//	}
+	public static void main(String... args) throws IOException {
+		completeTask("last try");
+		System.out.println("Done!");
+	}
 }
