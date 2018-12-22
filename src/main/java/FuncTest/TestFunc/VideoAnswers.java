@@ -26,6 +26,8 @@ public class VideoAnswers {
 		String query_checkVideo = "select * from dbo.Videos where ID = " + params.getString("coursenumber");
 		StringBuilder jsonResult = new StringBuilder();
 		
+		c.getLogger().info("=========== " + query_checkVideo + " ===========");
+		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.createStatement().executeQuery(query_checkVideo);
 			if (!resultSet.isBeforeFirst()) {
@@ -42,7 +44,7 @@ public class VideoAnswers {
 			return utils.createWebhookResponseContent(jsonResult.toString(), s);
 
 		} catch (Exception e) {
-			c.getLogger().info("=========== " + e.getMessage() + " ===========");
+			c.getLogger().info("=========== ERROR MSG2:" + e.getMessage() + " ===========");
 			throw new RuntimeException();
 		}
 	}
@@ -51,11 +53,21 @@ public class VideoAnswers {
 		c.getLogger().info("=========== BUILDING RESULT TEXT ===========");
 		try {
 			while(resultSet.next()) 
-				jsonResult.append("a " + resultSet.getString(3) + " video for course " + resultSet.getInt(1)
-				 + " was filmed in semester " + resultSet.getString(2) + "\n");
+				jsonResult.append("I found a video for course " + resultSet.getInt(1)
+				 + " at " + resultSet.getString(4) + ". ");
+				
+				if(resultSet.getString(3) != "NULL") 
+					jsonResult.append("Also, The type of the video is " + resultSet.getString(3));
+				
+				
+				if(resultSet.getString(2) != "NULL") 
+					jsonResult.append("And it was filmed at semester " + resultSet.getString(2));
+				
+			
+				jsonResult.append("\n");
 			
 		} catch (SQLException e) {
-			c.getLogger().info("=========== " + e.getMessage() + " ===========");
+			c.getLogger().info("=========== ERROR MSG: " + e.getMessage() + " ===========");
 			throw new RuntimeException();
 		}
 
