@@ -50,7 +50,6 @@ public class CourseListGetter {
 				usernameField.type(c.getUsername());
 				passwordField.type(c.getPassword());
 				HtmlPage page2 = submitButton.click();
-				System.out.println(page2.asText());
 				 semesterTables = page2.getByXPath("//table[@class='tab']");
 				//if already logged in
 			}catch(ElementNotFoundException e) {
