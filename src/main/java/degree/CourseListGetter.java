@@ -1,6 +1,8 @@
 package degree;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -9,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -22,6 +25,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import homework.LoginCredentials;
 
 public class CourseListGetter {
+	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36";
 	private static String DID_NOT_COMPLETE = "לא השלים";
 	private static String DID_NOT_DO = "-";
 	private List<Course> courseList = new ArrayList<>();
@@ -39,11 +43,19 @@ public class CourseListGetter {
 		List<HtmlTable> semesterTables;
 		try(WebClient webClient = new WebClient(BrowserVersion.CHROME)) {
 			webClient.getOptions().setUseInsecureSSL(true);
+			webClient.setAjaxController(new NicelyResynchronizingAjaxController());
 			webClient.getOptions().setRedirectEnabled(true);
 			webClient.getOptions().setJavaScriptEnabled(true);
+			webClient.getOptions().setCssEnabled(false);
 			webClient.getCookieManager().setCookiesEnabled(true);
 			webClient.getOptions().setThrowExceptionOnScriptError(false);
-			HtmlPage page = webClient.getPage("https://techmvs.technion.ac.il/cics/wmn/wmngrad?afiflzrc&ORD=1");
+			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+			//there is a problem with the header returned, unable to redirect because of it, so need to handle this manually
+			String redirectURL = getRedirectURL("http://techmvs.technion.ac.il/cics/wmn/wmngrad?ORD=1");
+			//Now can use the redirected url
+			if("".equals(redirectURL))
+				return null;
+			HtmlPage page = webClient.getPage(redirectURL);
 			//If not logged in
 			try {
 				HtmlForm form = page.getFormByName("SignonForm");
@@ -88,7 +100,6 @@ public class CourseListGetter {
 	private Course extractCourseFromRow(HtmlTableRow courseRow) {
 		if (courseRow.getCells().size() != 3)
 			return null;
-		System.out.println(courseRow.asText());
 		String courseGrade = courseRow.getCell(0).asText();
 		if (courseGrade.equals(DID_NOT_DO) || courseGrade.equals(DID_NOT_COMPLETE))
 			return null;
@@ -100,6 +111,15 @@ public class CourseListGetter {
 	private String extractCourseNumber(final String s) {
 		Matcher m = Pattern.compile("(\\d{6})").matcher(s);
 		return !m.find() ? "" : m.group(0);
+	}
+	
+	private String getRedirectURL(String url) throws IOException {
+		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+		con.setRequestMethod("GET");
+		con.setRequestProperty("User-Agent", USER_AGENT);
+		if(con.getResponseCode() == HttpURLConnection.HTTP_OK)
+			return url;
+		return con.getResponseCode() != HttpURLConnection.HTTP_MOVED_TEMP ? "" : con.getHeaderField("Location");
 	}
 	
 	public List<Course> getCourseList(){
