@@ -58,4 +58,12 @@ public class Course {
 		return this.points;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder string = new StringBuilder();
+		string.append(courseNum);
+		string.append(" - ");
+		string.append(points);
+		return string + "";	
+	}	
 }

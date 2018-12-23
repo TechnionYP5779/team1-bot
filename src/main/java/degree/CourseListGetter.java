@@ -7,7 +7,13 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.plaf.synth.SynthSpinnerUI;
+
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.FrameWindow;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
@@ -23,8 +29,8 @@ public class CourseListGetter {
 	private List<Course> courseList = new ArrayList<>();
 	
 	public CourseListGetter(LoginCredentials creds) {
-		java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 		try {
+			java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 			this.courseList = getCourseList(creds);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -32,21 +38,25 @@ public class CourseListGetter {
 	}
 	
 	private List<Course> getCourseList(LoginCredentials c) throws IOException{
-		try(WebClient webClient = new WebClient()) {
-			HtmlPage page = webClient.getPage("http://ug3.technion.ac.il/Tadpis.html");
+		try(WebClient webClient = new WebClient(BrowserVersion.CHROME)) {
+			webClient.getOptions().setUseInsecureSSL(true);
+			webClient.getOptions().setRedirectEnabled(true);
+			webClient.getOptions().setJavaScriptEnabled(true);
+			webClient.getCookieManager().setCookiesEnabled(true);
+			webClient.getOptions().setThrowExceptionOnScriptError(false);
+			HtmlPage page = webClient.getPage("https://techmvs.technion.ac.il/cics/wmn/wmngrad?afiflzrc&ORD=1");
+			//HtmlPage formPage = (HtmlPage) page.getFrameByName("UGTadpis").getEnclosedPage();
 			HtmlForm form = page.getFormByName("SignonForm");
-			HtmlSubmitInput submitButton = form.getInputByName("submit");
+			HtmlSubmitInput submitButton = form.getInputByValue("Signon");
 			HtmlTextInput usernameField = form.getInputByName("userid");
 			HtmlPasswordInput passwordField = form.getInputByName("password");
 			usernameField.type(c.getUsername());
 			passwordField.type(c.getPassword());
 			HtmlPage page2 = submitButton.click();
-			if(page2.getUrl() == page2.getUrl()) {
-				throw new WrongCredentialsException();
-			}
+			System.out.println(page2.asText());
 			List<HtmlTable> semesterTables = page2.getByXPath("//table[@class='tab']");
 			return extractCourseListFromTables(semesterTables);
-		}				
+		}
 	}
 	
 	private List<Course> extractCourseListFromTables(List<HtmlTable> semesterTables){
@@ -61,7 +71,10 @@ public class CourseListGetter {
 		List<Course> courseList = new ArrayList<>();
 		List<HtmlTableRow> courseTableRows = semesterTable.getRows();
 		for(HtmlTableRow courseRow : courseTableRows) {
-			courseList.add(extractCourseFromRow(courseRow));
+			Course course = extractCourseFromRow(courseRow);
+			if(course != null) {
+				courseList.add(course);
+			}
 		}
 		return courseList;	
 	}
@@ -76,12 +89,16 @@ public class CourseListGetter {
 		return new Course(courseNumber, Double.valueOf(coursePoints));
 	}
 	
-	private String extractCourseNumber(final String in) {
+	private String extractCourseNumber(final String s) {
 		Pattern p = Pattern.compile("(\\d{6})");
-		Matcher m = p.matcher(in);
+		Matcher m = p.matcher(s);
 		if (m.find()) {
 			return m.group(0);
 		}
 		return "";
+	}
+	
+	public List<Course> getCourseList(){
+		return this.courseList;
 	}
 }
