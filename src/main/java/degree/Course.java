@@ -18,43 +18,43 @@ public class Course {
 		this.isRequired = false;
 	}
 	
-	private void setIsListA(boolean flag) {
+	public void setIsListA(boolean flag) {
 		this.isListA = flag;
 	}
 	
-	private void setIsListB(boolean flag) {
+	public void setIsListB(boolean flag) {
 		this.isListB = flag;
 	}
 	
-	private void setIsProject(boolean flag) {
+	public void setIsProject(boolean flag) {
 		this.isProject = flag;
 	}
 	
-	private void setIsRequired(boolean flag) {
+	public void setIsRequired(boolean flag) {
 		this.isRequired = flag;
 	}
 	
-	private boolean getIsListA() {
+	public boolean getIsListA() {
 		return this.isListA;
 	}
 	
-	private boolean getIsListB() {
+	public boolean getIsListB() {
 		return this.isListB;
 	}
 	
-	private boolean getIsProject() {
+	public boolean getIsProject() {
 		return this.isProject;
 	}
 	
-	private boolean getIsRequired() {
+	public boolean getIsRequired() {
 		return this.isRequired;
 	}
 		
-	private String getCourseNum() {
+	public String getCourseNum() {
 		return this.courseNum;
 	}
 	
-	private double getPoints() {
+	public double getPoints() {
 		return this.points;
 	}
 	

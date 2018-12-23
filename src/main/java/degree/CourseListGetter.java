@@ -21,6 +21,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import homework.LoginCredentials;
 
 public class CourseListGetter {
+	private static String DID_NOT_COMPLETE = "לא השלים";
+	private static String DID_NOT_DO = "-";
 	private List<Course> courseList = new ArrayList<>();
 	
 	public CourseListGetter(LoginCredentials creds) {
@@ -59,6 +61,15 @@ public class CourseListGetter {
 		}
 	}
 	
+	private boolean checkCourseAlreadyExist(Course toCheck, List<Course> courseList) {
+		for(Course course : courseList) {
+			if(course.getCourseNum().equals(toCheck.getCourseNum())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private List<Course> extractCourseListFromTables(List<HtmlTable> semesterTables){
 		List<Course> courseList = new ArrayList<>();
 		for(HtmlTable table : semesterTables) {
@@ -72,7 +83,7 @@ public class CourseListGetter {
 		List<HtmlTableRow> courseTableRows = semesterTable.getRows();
 		for(HtmlTableRow courseRow : courseTableRows) {
 			Course course = extractCourseFromRow(courseRow);
-			if(course != null) {
+			if(course != null && !checkCourseAlreadyExist(course, courseList)) {
 				courseList.add(course);
 			}
 		}
@@ -83,6 +94,10 @@ public class CourseListGetter {
 		//Only choose course rows
 		if(courseRow.getCells().size() == 3) {
 			System.out.println(courseRow.asText());
+			String courseGrade = courseRow.getCell(0).asText();
+			if(courseGrade.equals(DID_NOT_DO) || courseGrade.equals(DID_NOT_COMPLETE)) {
+				return null;
+			}
 			String coursePoints = courseRow.getCell(1).asText();
 			String courseName = courseRow.getCell(2).asText();
 			String courseNumber = extractCourseNumber(courseName);
