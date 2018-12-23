@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
@@ -51,9 +52,7 @@ public class CourseListGetter {
 				HtmlPasswordInput passwordField = form.getInputByName("password");
 				usernameField.type(c.getUsername());
 				passwordField.type(c.getPassword());
-				HtmlPage page2 = submitButton.click();
-				 semesterTables = page2.getByXPath("//table[@class='tab']");
-				//if already logged in
+				semesterTables = ((DomNode) submitButton.click()).getByXPath("//table[@class='tab']");
 			}catch(ElementNotFoundException e) {
 				semesterTables = page.getByXPath("//table[@class='tab']");
 			}
@@ -62,19 +61,16 @@ public class CourseListGetter {
 	}
 	
 	private boolean checkCourseAlreadyExist(Course toCheck, List<Course> courseList) {
-		for(Course course : courseList) {
-			if(course.getCourseNum().equals(toCheck.getCourseNum())) {
+		for(Course course : courseList)
+			if (course.getCourseNum().equals(toCheck.getCourseNum()))
 				return true;
-			}
-		}
 		return false;
 	}
 	
 	private List<Course> extractCourseListFromTables(List<HtmlTable> semesterTables){
 		List<Course> courseList = new ArrayList<>();
-		for(HtmlTable table : semesterTables) {
+		for(HtmlTable table : semesterTables)
 			courseList.addAll(extractCourseListFromTable(table));
-		}
 		return courseList;
 	}
 	
@@ -83,40 +79,27 @@ public class CourseListGetter {
 		List<HtmlTableRow> courseTableRows = semesterTable.getRows();
 		for(HtmlTableRow courseRow : courseTableRows) {
 			Course course = extractCourseFromRow(courseRow);
-			if(course != null && !checkCourseAlreadyExist(course, courseList)) {
+			if(course != null && !checkCourseAlreadyExist(course, courseList))
 				courseList.add(course);
-			}
 		}
 		return courseList;	
 	}
 	
 	private Course extractCourseFromRow(HtmlTableRow courseRow) {
-		//Only choose course rows
-		if(courseRow.getCells().size() == 3) {
-			System.out.println(courseRow.asText());
-			String courseGrade = courseRow.getCell(0).asText();
-			if(courseGrade.equals(DID_NOT_DO) || courseGrade.equals(DID_NOT_COMPLETE)) {
-				return null;
-			}
-			String coursePoints = courseRow.getCell(1).asText();
-			String courseName = courseRow.getCell(2).asText();
-			String courseNumber = extractCourseNumber(courseName);
-			//if does not contain a courseNumber ignore
-			if(courseNumber.equals("")) {
-				return null;
-			}
-			return new Course(courseNumber, Double.valueOf(coursePoints));
-		}
-		return null;
+		if (courseRow.getCells().size() != 3)
+			return null;
+		System.out.println(courseRow.asText());
+		String courseGrade = courseRow.getCell(0).asText();
+		if (courseGrade.equals(DID_NOT_DO) || courseGrade.equals(DID_NOT_COMPLETE))
+			return null;
+		String courseName = courseRow.getCell(2).asText(),
+				courseNumber = extractCourseNumber(courseName);
+		return "".equals(courseNumber) ? null : new Course(courseNumber, Double.valueOf(courseRow.getCell(1).asText()));
 	}
 	
 	private String extractCourseNumber(final String s) {
-		Pattern p = Pattern.compile("(\\d{6})");
-		Matcher m = p.matcher(s);
-		if (m.find()) {
-			return m.group(0);
-		}
-		return "";
+		Matcher m = Pattern.compile("(\\d{6})").matcher(s);
+		return !m.find() ? "" : m.group(0);
 	}
 	
 	public List<Course> getCourseList(){
