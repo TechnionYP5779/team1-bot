@@ -1,16 +1,17 @@
 package degree;
 
 public class Course {
-	private final String courseName;
+	//Can only work with course numbers for now, because it is with Hebrew in Tadpis
 	private final String courseNum;
 	private boolean isProject;
 	private boolean isListA;
 	private boolean isListB;
 	private boolean isRequired;
+	private double points;
 	
-	public Course(String courseNum, String courseName) {
-		this.courseName = courseName;
+	public Course(String courseNum, double points) {
 		this.courseNum = courseNum;
+		this.points = points;
 		this.isListA = false;
 		this.isListB = false;
 		this.isProject = false;
@@ -48,13 +49,13 @@ public class Course {
 	private boolean getIsRequired() {
 		return this.isRequired;
 	}
-	
-	private String getCourseName() {
-		return this.courseName;
-	}
-	
+		
 	private String getCourseNum() {
 		return this.courseNum;
+	}
+	
+	private double getPoints() {
+		return this.points;
 	}
 	
 }
