@@ -106,6 +106,11 @@
 		    <artifactId>htmlunit</artifactId>
 		    <version>2.33</version>
 		</dependency>
+		<dependency>
+    		<groupId>org.apache.pdfbox</groupId>
+    		<artifactId>pdfbox</artifactId>
+    		<version>2.0.13</version>
+		</dependency>
     </dependencies>
 
     <build>

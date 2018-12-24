@@ -112,7 +112,7 @@ public class CourseListGetter {
 		Matcher m = Pattern.compile("(\\d{6})").matcher(s);
 		return !m.find() ? "" : m.group(0);
 	}
-	
+		
 	private String getRedirectURL(String url) throws IOException {
 		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 		con.setRequestMethod("GET");
