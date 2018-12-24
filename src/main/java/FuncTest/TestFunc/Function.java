@@ -15,6 +15,7 @@ import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
 import responses.TableResponse;
+import rule.loginHandler;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -29,19 +30,32 @@ public class Function {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
-		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
-			return getHourByDay(queryResult, s, c);
-		case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
-			return getHourByWeek(queryResult, s, c);
-		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
-			return getUpcomingHomework(queryResult, s, c);
+			case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
+				return getHourByDay(queryResult, s, c);
+			case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
+				return getHourByWeek(queryResult, s, c);
+			case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
+				return getUpcomingHomework(queryResult, s, c);
+			case globals.LOGIN_INTENT:
+				return checkLoginName(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
+	}
+	
+	private HttpResponseMessage checkLoginName(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			final ExecutionContext c)
+	{
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		List<String> requiredParameterNames = new ArrayList<>();
+		requiredParameterNames.add("username");
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+			return utils.createWebhookResponseContent("Missing username. Please choose a user to log in", s);
+		return utils.createWebhookResponseContent(
+				(new loginHandler(parameters.getString("username"))).checkUserNameExists(), s);
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c) {
-		c.getLogger().info("=========== GET HOUR BY WEEK ===========");
 		JSONObject parameters = queryResult.getJSONObject("parameters");
 		String bname = "";
 		if (!parameters.has("Business"))

@@ -8,9 +8,12 @@ public class globals {
 	public static final String BUSINESS_HOUR_WEEK_INTENT_NAME = "technion.businesses.fullweek";
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
 	public static final String TEST_INTENT = "testIntent";
+	public static final String LOGIN_INTENT = "technion.login";
+	public static final String SUBSCRIBE_INTENT = "technion.subscribe";
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
+	public static final String UNKNOWN_USERNAME = "No user with this username was found. Please retry.";
 	public static final String MISSING_DAY_PARAM = "Please specify a day\n";
 	public static final String CONNECTION_STRING = String.format(
 			"jdbc:sqlserver://%s:1433;database=%s;user=%s;password=%s;encrypt=true;"
