@@ -21,11 +21,6 @@ public class subscribeHandler {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
 			connection.prepareStatement(
 					"INSERT INTO Users(Username,GRPass) VALUES ('" + this.username + "','" + this.password + "')").executeUpdate();
-/*			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
-			String selectSql = "INSERT INTO Users(Username,GRPass) VALUES ('"+this.username+"','"+this.password+"')";
-			try (Statement statement = connection.createStatement();
-					ResultSet resultSet = statement.executeQuery(selectSql)) {
-*/
 			jsonResult.append("Rule saved successfuly");
 			connection.close();
 		} catch (Exception e) {
