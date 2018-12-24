@@ -80,9 +80,4 @@ public class utils {
 		JSONObject parameters = queryResult.getJSONObject("parameters");
 		return !parameters.has(paramName) ? null : parameters.getString(paramName);
 	}
-		
-	public static Integer getIntUserParamFromContext(JSONObject queryResult, String paramName) {
-		JSONObject parameters = queryResult.getJSONArray("outputContexts").getJSONObject(0).getJSONObject("parameters");
-		return !parameters.has(paramName) ? null : parameters.getInt(paramName);
-	}
 }
