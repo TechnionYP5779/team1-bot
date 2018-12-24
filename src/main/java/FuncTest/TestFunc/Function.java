@@ -15,6 +15,7 @@ import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import responses.TableResponse;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -33,6 +34,10 @@ public class Function {
 			return getHourByDay(queryResult, s, c);
 		case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
 			return getHourByWeek(queryResult, s, c);
+
+		case globals.FILTER_COURSES_INTENT_NAME:
+			return getMatchingCoursesResponse(queryResult, s, c);
+
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
 		case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
@@ -41,6 +46,62 @@ public class Function {
 			return getCoursesPrerequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
+	}
+
+	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== FILTER COURSES BY PARAMS ===========");
+
+		String facultyName = utils.getStringUserParamFromContext(queryResult, "Faculty");
+		Integer lectureHours = utils.getIntUserParamFromContext(queryResult, "lectureHours");
+		Integer tutorialHours = utils.getIntUserParamFromContext(queryResult, "tutorialHours");
+		String dateA[] = utils.getDateRange(queryResult, "date-period");
+		
+		String query = utils.buildFilteringQuery(facultyName, lectureHours, tutorialHours, dateA);
+		StringBuilder jsonResult = new StringBuilder();
+
+		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
+		c.getLogger().info("=========== lectureHours IS " + lectureHours + " ===========");
+		c.getLogger().info("=========== tutorialHours IS " + tutorialHours + " ===========");
+		c.getLogger().info("=========== dateRangeA IS " + dateA[0] + " to " + dateA[1] + " ===========");
+		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (!resultSet.isBeforeFirst()) {
+				c.getLogger().info("=========== NO RESULTS ===========");
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			} else {
+				c.getLogger().info("=========== FOUND RESULTS ===========");
+				jsonResult.append("Here's what I found:\n");
+				jsonResult = parseFilterResults(resultSet, jsonResult, c);
+			}
+			
+			connection.close();
+			c.getLogger().info("=========== RETURNING RESULTS ===========");
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+			
+		} catch (Exception e) {
+			c.getLogger().info("=========== " + e.getMessage() + " ===========");
+			throw new RuntimeException();
+		}
+	}
+
+	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
+		c.getLogger().info("=========== MAKING RESULTS ===========");
+		try {
+			for (int count = 1; resultSet.next();) {
+				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
+			resultSet.getString(2) + ")\n");
+				++count;
+			}
+		} catch (SQLException e) {
+			c.getLogger().info("=========== " + e.getMessage() + " ===========");
+			throw new RuntimeException();
+		}
+		
+		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
+		return jsonResult;
 
 	}
 	
@@ -162,6 +223,7 @@ public class Function {
 		day = utils.dayValidation(parameters.getString("DayOfWeek"));
 		if ("".equals(day))
 			return utils.createWebhookResponseContent("I'm sorry I don't know what day you mean\n", s);
+
 		Connection connection = null;
 		StringBuilder jsonResult = new StringBuilder();
 		try {
@@ -200,12 +262,10 @@ public class Function {
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {
-			return utils.createWebhookResponseContent(homework.getUpcomingHomeworkAsString(), s);
+			return TableResponse.homeworkTableResponse(s, homework.getUpcomingHomework());
 		} catch (WrongCredentialsException e) {
 			return utils.createWebhookResponseContent("Wrong credentials, please try again", s);
 		}
 	}
-
-	
 
 }
