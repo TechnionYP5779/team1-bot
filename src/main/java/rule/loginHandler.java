@@ -20,6 +20,7 @@ public class loginHandler {
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
 			String selectSql = "SELECT * FROM Users WHERE Username = '"+this.username+"'";
+			jsonResult.append(selectSql);
 			try (Statement statement = connection.createStatement();
 					ResultSet resultSet = statement.executeQuery(selectSql)) {
 				if (!resultSet.isBeforeFirst())

@@ -16,6 +16,7 @@ import homework.LoginCredentials;
 import homework.WrongCredentialsException;
 import responses.TableResponse;
 import rule.loginHandler;
+import rule.subscribeHandler;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -38,8 +39,22 @@ public class Function {
 				return getUpcomingHomework(queryResult, s, c);
 			case globals.LOGIN_INTENT:
 				return checkLoginName(queryResult, s, c);
+			case globals.SUBSCRIBE_INTENT:
+				return subscribeToSystem(queryResult,s,c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
+	}
+	
+	private HttpResponseMessage subscribeToSystem(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			final ExecutionContext c) {
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		List<String> requiredParameterNames = new ArrayList<>();
+		requiredParameterNames.add("username");
+		requiredParameterNames.add("password");
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+			return utils.createWebhookResponseContent("Please enter user credentials to subscribe with.", s);
+		return utils.createWebhookResponseContent(
+				(new subscribeHandler(parameters.getString("username"),parameters.getString("password"))).subscribe(), s);
 	}
 	
 	private HttpResponseMessage checkLoginName(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
