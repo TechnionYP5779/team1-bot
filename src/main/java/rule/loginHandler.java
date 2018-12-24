@@ -19,7 +19,7 @@ public class loginHandler {
 		StringBuilder jsonResult = new StringBuilder();
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
-			String selectSql = "SELECT * FROM Users WHERE Username = "+this.username;
+			String selectSql = "SELECT * FROM Users WHERE Username = '"+this.username+"'";
 			try (Statement statement = connection.createStatement();
 					ResultSet resultSet = statement.executeQuery(selectSql)) {
 				if (!resultSet.isBeforeFirst())
