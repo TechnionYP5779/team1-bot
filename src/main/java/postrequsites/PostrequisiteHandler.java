@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,24 +21,27 @@ import FuncTest.TestFunc.utils;
 import responses.TableResponse;
 
 public class PostrequisiteHandler {
-
+	
+	private static final String SERVER_ERROR = "A server error ocurred please try again.";
 
 	public static HttpResponseMessage getPostrequisitesByNumber(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
 		try {
 			JSONObject parameters = queryResult.getJSONObject("parameters");
-			List<String> requiredParameterNames = new ArrayList<>();
-			requiredParameterNames.add("courseNum");
-			if (!utils.allParametersArePresent(parameters, requiredParameterNames))
-				return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
+			if (!utils.allParametersArePresent(parameters, Arrays.asList("courseNum"))) {
+				c.getLogger().info("ERROR::PostrequisiteHandler::Missing parameters");
+				return utils.createWebhookResponseContent(SERVER_ERROR, s);
+				
+			}
 			int courseNum = parameters.getInt("courseNum");
 			Course course = extractCourseInfo(courseNum);
 			if(course.isInvalid()) 
 				return utils.createWebhookResponseContent("There is no course with id " +courseNum + ", please try again." , s);
 			return getPostrequisites(s, course);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return utils.createWebhookResponseContent("SQL Exception. Please report this", s);
+			c.getLogger().info("ERROR::PostrequisiteHandler::SQL Exception");
+			c.getLogger().info(e.toString());
+			return utils.createWebhookResponseContent(SERVER_ERROR, s);
 
 		}
 	}
@@ -53,26 +57,16 @@ public class PostrequisiteHandler {
 		}
 	}
 	
-//	private static Course extractCourseWithSimilarNames(String courseName) throws SQLException {
-//		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-//			PreparedStatement ps = connection.prepareStatement("Select ID,Name From Courses WHERE Courses.Name LIKE '%?%';");
-//			ps.setString(1, courseName);
-//			ResultSet rs = ps.executeQuery();
-//			if(!rs.next())
-//				return Course.INVALID_COURSE;
-//			return new Course(rs.getString(2),rs.getInt(1));
-//		}
-//	}
 
 	public static HttpResponseMessage getPostrequisitesByName(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
 
 		try {
 			JSONObject parameters = queryResult.getJSONObject("parameters");
-			List<String> requiredParameterNames = new ArrayList<>();
-			requiredParameterNames.add("courseName");
-			if (!utils.allParametersArePresent(parameters, requiredParameterNames))
-				return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
+			if (!utils.allParametersArePresent(parameters, Arrays.asList("courseName"))) {
+				c.getLogger().info("ERROR::PostrequisiteHandler::Missing parameters");
+				return utils.createWebhookResponseContent(SERVER_ERROR, s);	
+			}
 			String courseName = parameters.getString("courseName");
 			Course course = extractCourseInfo(courseName);
 			if(course.isInvalid()) 
@@ -80,8 +74,9 @@ public class PostrequisiteHandler {
 
 			return getPostrequisites(s, course);
 		} catch(SQLException e) {
-			e.printStackTrace();
-			return utils.createWebhookResponseContent("SQL Exception. Please report this", s);
+			c.getLogger().info("ERROR::PostrequisiteHandler::SQL Exception");
+			c.getLogger().info(e.toString());
+			return utils.createWebhookResponseContent(SERVER_ERROR, s);
 		}
 	}
 	

@@ -53,10 +53,8 @@ public class PostrequisiteDBGenerator {
 			s.setInt(2, Integer.parseInt(postreqPair.getRight()));
 			s.addBatch();
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
