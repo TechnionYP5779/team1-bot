@@ -9,12 +9,14 @@ import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
+
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import postrequsites.PostrequisiteHandler;
 import responses.TableResponse;
 import rule.RunRulesHandler;
 import rule.loginHandler;
@@ -47,6 +49,10 @@ public class Function {
 				return getMatchingCoursesResponse(queryResult, s, c);
 			case globals.RUN_RULES_INTENT:
 				return applyRules(queryResult, s, c);
+      case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
+         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+      case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
+        return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
@@ -130,11 +136,17 @@ public class Function {
 	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
 		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
-			for (int count = 1; resultSet.next();) {
+			for (int count = 1; resultSet.next() & count <= globals.COURSE_FILTER_LIMIT;) {
 				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
 			resultSet.getString(2) + ")\n");
 				++count;
 			}
+			
+			if(resultSet.next()) //more answers to be read after reading limit
+				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
+						+ "To narrow your search please add parameters)");
+			
+			
 		} catch (SQLException e) {
 			c.getLogger().info("=========== " + e.getMessage() + " ===========");
 			throw new RuntimeException();
@@ -229,6 +241,7 @@ public class Function {
 		List<String> requiredParameterNames = new ArrayList<>();
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
+
 		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
 			return utils.createWebhookResponseContent("Missing parameters. Please report this", s);
 		
