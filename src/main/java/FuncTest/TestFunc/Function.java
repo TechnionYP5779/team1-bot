@@ -9,12 +9,14 @@ import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
+
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import postrequsites.PostrequisiteHandler;
 import responses.TableResponse;
 
 /**
@@ -30,20 +32,22 @@ public class Function {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
-		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
-			return getHourByDay(queryResult, s, c);
-		case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
-			return getHourByWeek(queryResult, s, c);
-
-		case globals.FILTER_COURSES_INTENT_NAME:
-			return getMatchingCoursesResponse(queryResult, s, c);
-
-		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
-			return getUpcomingHomework(queryResult, s, c);
-		case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
-			return getCoursesPrerequisitesByName(queryResult, s, c);
-		case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
-			return getCoursesPrerequisitesByNumber(queryResult, s, c);
+      case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
+        return getHourByDay(queryResult, s, c);
+      case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
+        return getHourByWeek(queryResult, s, c);
+      case globals.FILTER_COURSES_INTENT_NAME:
+        return getMatchingCoursesResponse(queryResult, s, c);
+      case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
+        return getUpcomingHomework(queryResult, s, c);
+      case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
+			  return getCoursesPrerequisitesByName(queryResult, s, c);
+		  case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
+			  return getCoursesPrerequisitesByNumber(queryResult, s, c);
+      case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
+        return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+      case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
+        return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
@@ -90,11 +94,17 @@ public class Function {
 	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
 		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
-			for (int count = 1; resultSet.next();) {
+			for (int count = 1; resultSet.next() & count <= globals.COURSE_FILTER_LIMIT;) {
 				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
 			resultSet.getString(2) + ")\n");
 				++count;
 			}
+			
+			if(resultSet.next()) //more answers to be read after reading limit
+				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
+						+ "To narrow your search please add parameters)");
+			
+			
 		} catch (SQLException e) {
 			c.getLogger().info("=========== " + e.getMessage() + " ===========");
 			throw new RuntimeException();
@@ -256,9 +266,9 @@ public class Function {
 		List<String> requiredParameterNames = new ArrayList<>();
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
 			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
-		
+
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {

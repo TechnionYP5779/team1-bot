@@ -40,14 +40,15 @@ public class utils {
 	}
 
 	protected static String fromIntToDay(int i) {
-		return (new String[] { "zeroDay", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })[i];
+		return (new String[] { "zeroDay", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+				"Saturday" })[i];
 	}
-	
-	protected static boolean allParametersArePresent(JSONObject parameters, Collection<String> paremeterNames) {
+
+	public static boolean allParametersArePresent(JSONObject parameters, Collection<String> paremeterNames) {
 		return paremeterNames.stream().allMatch(paramName -> parameters.has(paramName));
 	}
 
-	protected static HttpResponseMessage createWebhookResponseContent(String resultText,
+	public static HttpResponseMessage createWebhookResponseContent(String resultText,
 			HttpRequestMessage<Optional<String>> s) {
 		return s.createResponseBuilder(
 				HttpStatus.OK).body(
