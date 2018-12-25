@@ -16,6 +16,7 @@ import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
 import responses.TableResponse;
+import rule.RunRulesHandler;
 import rule.loginHandler;
 import rule.subscribeHandler;
 
@@ -42,34 +43,49 @@ public class Function {
 				return checkLoginName(queryResult, s, c);
 			case globals.SUBSCRIBE_INTENT:
 				return subscribeToSystem(queryResult,s,c);
-      case globals.FILTER_COURSES_INTENT_NAME:
-        return getMatchingCoursesResponse(queryResult, s, c);
+			case globals.FILTER_COURSES_INTENT_NAME:
+				return getMatchingCoursesResponse(queryResult, s, c);
+			case globals.RUN_RULES_INTENT:
+				return applyRules(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
 	
+	private HttpResponseMessage applyRules(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		// TODO Auto-generated method stub
+		String uname = utils.getStringUserParamFromContext(queryResult, "username");
+		String passwd = utils.getStringUserParamFromContext(queryResult, "password");
+		
+		c.getLogger().info("================ username = " + uname + "================");
+		c.getLogger().info("================ password = " + passwd + "================");
+		
+		return new RunRulesHandler(uname, passwd).runHomeworkRules(s,c);
+	}
+
 	private HttpResponseMessage subscribeToSystem(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c) {
 		JSONObject parameters = queryResult.getJSONObject("parameters");
-		List<String> requiredParameterNames = new ArrayList<>();
-		requiredParameterNames.add("username");
-		requiredParameterNames.add("password");
+		List<String> requiredParameterNames = Arrays.asList("username", "password");
+		
 		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
 			return utils.createWebhookResponseContent("Please enter user credentials to subscribe with.", s);
+		
 		return utils.createWebhookResponseContent(
-				(new subscribeHandler(parameters.getString("username"),parameters.getString("password"))).subscribe(), s);
+				(new subscribeHandler(parameters.getString("username"),parameters.getString("password"))).subscribe(c), s);
 	}
 	
 	private HttpResponseMessage checkLoginName(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c)
 	{
 		JSONObject parameters = queryResult.getJSONObject("parameters");
-		List<String> requiredParameterNames = new ArrayList<>();
-		requiredParameterNames.add("username");
+		List<String> requiredParameterNames = Arrays.asList("username", "password");
+		
 		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
 			return utils.createWebhookResponseContent("Missing username. Please choose a user to log in", s);
+		
 		return utils.createWebhookResponseContent(
-				(new loginHandler(parameters.getString("username"))).checkUserNameExists(), s);
+				(new loginHandler(parameters.getString("username"), parameters.getString("password"))).checkUserNameExists(), s);
 	}
 
 	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,
@@ -214,7 +230,7 @@ public class Function {
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
 		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
-			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
+			return utils.createWebhookResponseContent("Missing parameters. Please report this", s);
 		
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);

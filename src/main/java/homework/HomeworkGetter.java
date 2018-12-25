@@ -8,10 +8,25 @@ import java.util.stream.*;
 
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.*;
+import com.microsoft.azure.functions.ExecutionContext;
 
 public class HomeworkGetter {
 	private List<Homework> homework = new ArrayList<>();
-
+	private ExecutionContext context = null;
+	
+	public HomeworkGetter(LoginCredentials creds, final ExecutionContext c) {
+		this.context = c;
+		
+		try {
+			java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+			c.getLogger().info("==================== getting homework ========================");
+			this.homework = GetHomework(creds);
+			c.getLogger().info("==================== got homework ========================");
+		} catch (IOException ¢) {
+			c.getLogger().info("====================" + ¢.getMessage() + "========================");
+		}
+	}
+	
 	public HomeworkGetter(LoginCredentials creds) {
 		try {
 			java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);

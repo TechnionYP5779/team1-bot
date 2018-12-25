@@ -10,7 +10,8 @@ public class globals {
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
 	public static final String TEST_INTENT = "testIntent";
 	public static final String LOGIN_INTENT = "technion.login";
-	public static final String SUBSCRIBE_INTENT = "technion.subscribe";
+	public static final String SUBSCRIBE_INTENT = "technion.rules.subscribe";
+	public static final String RUN_RULES_INTENT = "technion.rules.run";
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";

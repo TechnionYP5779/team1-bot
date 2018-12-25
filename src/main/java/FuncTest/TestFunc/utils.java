@@ -47,7 +47,7 @@ public class utils {
 		return paremeterNames.stream().allMatch(paramName -> parameters.has(paramName));
 	}
 
-	protected static HttpResponseMessage createWebhookResponseContent(String resultText,
+	public static HttpResponseMessage createWebhookResponseContent(String resultText,
 			HttpRequestMessage<Optional<String>> s) {
 		return s.createResponseBuilder(
 				HttpStatus.OK).body(

@@ -3,6 +3,8 @@ package rule;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import com.microsoft.azure.functions.ExecutionContext;
+
 import FuncTest.TestFunc.globals;
 
 public class subscribeHandler {
@@ -14,7 +16,7 @@ public class subscribeHandler {
 		this.password = password;
 	}
 	
-	public String subscribe() {
+	public String subscribe(final ExecutionContext c) {
 		Connection connection = null;
 		StringBuilder jsonResult = new StringBuilder();
 		try {
@@ -25,7 +27,7 @@ public class subscribeHandler {
 			connection.close();
 		} catch (Exception e) {
 			jsonResult.append("Some error has occured and the subscription has failed.\n Please try again.");
-			e.printStackTrace();
+			c.getLogger().info("====================" + e.getMessage() + "======================");
 		}
 		return jsonResult.toString();
 	}
