@@ -1,0 +1,18 @@
+<DOC>
+<DOCNO> 2 </DOCNO>
+<TEXT>
+onion vegetable soup vegetable mushroom corn
+</TEXT>
+</DOC>
+<DOC>
+<DOCNO> 3 </DOCNO>
+<TEXT>
+corn onion soup onion mushroom corn
+</TEXT>
+</DOC>
+<DOC>
+<DOCNO> 4 </DOCNO>
+<TEXT>
+potato pumpkin tofu potato tofu potato
+</TEXT>
+</DOC>
