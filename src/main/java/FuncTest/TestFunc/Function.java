@@ -87,11 +87,17 @@ public class Function {
 	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
 		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
-			for (int count = 1; resultSet.next();) {
+			for (int count = 1; resultSet.next() & count <= globals.COURSE_FILTER_LIMIT;) {
 				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
 			resultSet.getString(2) + ")\n");
 				++count;
 			}
+			
+			if(resultSet.next()) //more answers to be read after reading limit
+				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
+						+ "To narrow your search please add parameters)");
+			
+			
 		} catch (SQLException e) {
 			c.getLogger().info("=========== " + e.getMessage() + " ===========");
 			throw new RuntimeException();
