@@ -9,12 +9,14 @@ import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
+
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
+import postrequsites.PostrequisiteHandler;
 import responses.TableResponse;
 
 /**
@@ -30,17 +32,18 @@ public class Function {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
-		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
-			return getHourByDay(queryResult, s, c);
-		case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
-			return getHourByWeek(queryResult, s, c);
-
-		case globals.FILTER_COURSES_INTENT_NAME:
-			return getMatchingCoursesResponse(queryResult, s, c);
-
-		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
-			return getUpcomingHomework(queryResult, s, c);
-
+      case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
+        return getHourByDay(queryResult, s, c);
+      case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
+        return getHourByWeek(queryResult, s, c);
+      case globals.FILTER_COURSES_INTENT_NAME:
+        return getMatchingCoursesResponse(queryResult, s, c);
+      case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
+        return getUpcomingHomework(queryResult, s, c);
+      case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
+         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+      case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
+        return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
@@ -193,9 +196,9 @@ public class Function {
 		List<String> requiredParameterNames = new ArrayList<>();
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
 			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
-		
+
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {
