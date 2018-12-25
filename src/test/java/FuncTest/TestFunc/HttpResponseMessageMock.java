@@ -28,7 +28,7 @@ public class HttpResponseMessageMock implements HttpResponseMessage {
 
     @Override
     public int getStatusCode() {
-        return httpStatusCode;
+        return this.httpStatusCode;
     }
 
     @Override

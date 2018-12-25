@@ -40,8 +40,12 @@ public class Function {
         return getMatchingCoursesResponse(queryResult, s, c);
       case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
         return getUpcomingHomework(queryResult, s, c);
+      case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
+			  return getCoursesPrerequisitesByName(queryResult, s, c);
+		  case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
+			  return getCoursesPrerequisitesByNumber(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
-         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+        return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
 		}
@@ -109,6 +113,72 @@ public class Function {
 		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
 		return jsonResult;
 
+	}
+	
+	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
+		String courseName = utils.getUserParam(queryResult, "courseName"),
+				query = utils.buildPrerequisitesQueryByName(courseName);
+		c.getLogger().info("=========== COURSE NAME IS " + courseName + " ===========");
+		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder jsonResult = new StringBuilder();
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (resultSet.isBeforeFirst())
+				parsePrerequisitesResults(resultSet, jsonResult, c);
+			else
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			connection.close();
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	private HttpResponseMessage getCoursesPrerequisitesByNumber(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
+		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
+		c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
+		String query = utils.buildPrerequisitesQueryByNumber(courseNumber);
+		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder jsonResult = new StringBuilder();
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (resultSet.isBeforeFirst())
+				parsePrerequisitesResults(resultSet, jsonResult, c);
+			else
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			connection.close();
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	private void parsePrerequisitesResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
+		try {
+			resultSet.next();
+			String pre = resultSet.getString(1);
+			c.getLogger().info(pre);
+			Integer count = 1;
+			String allOptions[] = pre.split("(\\|)");
+			for(String opt : allOptions) {
+				String anOption[] = opt.split("(&)");
+				jsonResult.append(count.toString() + ") ");
+				for(String course : anOption)
+					jsonResult.append(course + " AND ");
+				jsonResult.delete(jsonResult.length() - 5, jsonResult.length() - 1);
+				jsonResult.append("\nOR\n");
+				++count;
+			}
+			jsonResult.delete(jsonResult.length() - 4, jsonResult.length() - 1);
+			c.getLogger().info(jsonResult.toString());
+			assert !resultSet.next();
+		} catch (SQLException e) {
+			throw new RuntimeException();
+		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
