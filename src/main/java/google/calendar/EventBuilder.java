@@ -1,6 +1,5 @@
 package google.calendar;
-
-import java.util.Calendar;
+import java.util.Date;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -21,14 +20,29 @@ public class EventBuilder {
 	private EventDateTime start;
 	private EventDateTime end;
 	
-	public EventBuilder setEndDate(Calendar x) {
-		x.add(Calendar.DATE, 1);
-		this.end = new EventDateTime().setDate(new DateTime(x.getTime()));
+	/**
+	 * Calendar-Date Can be created using = 
+	 *	Calendar cal = Calendar.getInstance();
+	 *	cal.set(Calendar.YEAR, 1988);
+	 *	cal.set(Calendar.MONTH, Calendar.JANUARY);
+	 *	cal.set(Calendar.DAY_OF_MONTH, 1);
+	 * Date dateRepresentation = cal.getTime();
+	 */
+	public EventBuilder setEndDate(Date x) {
+		this.end = new EventDateTime().setDate(new DateTime(x));
 		return this;
 	}
-	public EventBuilder setStartDate(Calendar x) {
-		x.add(Calendar.DATE, 1);
-		this.start =new EventDateTime().setDate(new DateTime(x.getTime()));
+	
+	/**
+	 * Calendar-Date Can be created using = 
+	 *	Calendar cal = Calendar.getInstance();
+	 *	cal.set(Calendar.YEAR, 1988);
+	 *	cal.set(Calendar.MONTH, Calendar.JANUARY);
+	 *	cal.set(Calendar.DAY_OF_MONTH, 1);
+	 * Date dateRepresentation = cal.getTime();
+	 */
+	public EventBuilder setStartDate(Date x) {
+		this.start =new EventDateTime().setDate(new DateTime(x));
 		return this;
 	}
 	

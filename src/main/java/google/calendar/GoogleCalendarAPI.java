@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GoogleCalendarAPI {
-    private static final String APPLICATION_NAME = "Google Calendar API Java Quickstart";
+    private static final String APPLICATION_NAME = "Technion Bot Google Calendar Support";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
