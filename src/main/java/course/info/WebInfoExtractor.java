@@ -159,10 +159,8 @@ public class WebInfoExtractor {
 	}
 
 	public static void writeCsvFile(String fileName, List<CourseObject> cl) {
-		FileWriter fileWriter = null;
-
-		try {
-			fileWriter = new FileWriter(fileName);
+		try (FileWriter fileWriter = new FileWriter(fileName)){
+			
 
 			// Write the CSV file header
 			fileWriter.append(FILE_HEADER);
@@ -200,28 +198,18 @@ public class WebInfoExtractor {
 			}
 
 			System.out.println("CSV file was created successfully !!!");
-
+			fileWriter.flush();
+			fileWriter.close();
 		} catch (Exception ¢) {
 			System.out.println("Error in CsvFileWriter !!!");
 			¢.printStackTrace();
-		} finally {
-
-			try {
-				assert fileWriter != null;
-				fileWriter.flush();
-				fileWriter.close();
-			} catch (IOException ¢) {
-				System.out.println("Error while flushing/closing fileWriter !!!");
-				¢.printStackTrace();
-			}
-
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println("In main");
-//	  WebInfoExtractor.writeCsvFile("courseInfo.csv", WebInfoExtractor.getCourseData());
-		getCourseDescriptionToJSON("CourseDesc.json");
-	}
+//	public static void main(String[] args) {
+//		System.out.println("In main");
+////	  WebInfoExtractor.writeCsvFile("courseInfo.csv", WebInfoExtractor.getCourseData());
+//		getCourseDescriptionToJSON("CourseDesc.json");
+//	}
 
 }

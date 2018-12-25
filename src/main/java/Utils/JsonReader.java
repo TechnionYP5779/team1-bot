@@ -15,31 +15,27 @@ public class JsonReader {
 		return IOUtils.toString(rd);
 	}
 
-//Had to used suppress warning since the address is always available and finally close has to happen
-	@SuppressWarnings("resource")
 	public static JSONArray readJsonFromUrl(String url) {
-
-		InputStream $ = null;
-		try {
-			$ = new URL(url).openStream();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			return new JSONArray(readAll(new BufferedReader(extracted($))));
-		} catch (JSONException | IOException ¢) {
-			// TODO Auto-generated catch block
-			¢.printStackTrace();
-		} finally {
+		try (InputStream $ = new URL(url).openStream()){
+			
 			try {
-				// can't use azzert.notNull($) since warning regarding $ being null still
-				// appears.
-				assert $ != null;
-				$.close();
-			} catch (IOException ¢) {
+				return new JSONArray(readAll(new BufferedReader(extracted($))));
+			} catch (JSONException | IOException ¢) {
 				// TODO Auto-generated catch block
 				¢.printStackTrace();
+			} finally {
+				try {
+					// can't use azzert.notNull($) since warning regarding $ being null still
+					// appears.
+					assert $ != null;
+					$.close();
+				} catch (IOException ¢) {
+					// TODO Auto-generated catch block
+					¢.printStackTrace();
+				}
 			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 		return null;
 	}
