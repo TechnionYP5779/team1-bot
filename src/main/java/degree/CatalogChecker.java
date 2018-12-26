@@ -2,7 +2,6 @@ package degree;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 import com.microsoft.azure.functions.ExecutionContext;
 
 import FuncTest.TestFunc.globals;
-import FuncTest.TestFunc.utils;
 import homework.LoginCredentials;
 
 public class CatalogChecker {
@@ -23,29 +21,19 @@ public class CatalogChecker {
 	
 	public CatalogChecker(ExecutionContext c, LoginCredentials creds) {
 		this.c = c;
-		CourseListGetter clg = new CourseListGetter(creds);
-		myCourses = clg.getCourseList();
+		myCourses = (new CourseListGetter(creds)).getCourseList();
 	}
 	
 	public double sumPoints(List<Course> list){
 		return list.stream().map(c -> c.getPoints()).reduce(0.0, (x,y) -> x+y);
 	}
 	
-	public List<Course> getMissingMandatory() {
-		List<Course> mandatory = null;
-		try {
-			mandatory = getMandatory();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		List<Course> diff = difference(mandatory, myCourses);
-		if(myCourses.contains(new Course(234145, -1))){
+	public List<Course> getMissingMandatory() throws SQLException{
+		List<Course> mandatory = getMandatory(), diff = difference(mandatory, myCourses);
+		if(myCourses.contains(new Course(234145, -1)))
 			diff.remove(new Course(44145, -1));
-		}
-		if(myCourses.contains(new Course(44145, -1))){
+		if(myCourses.contains(new Course(44145, -1)))
 			diff.remove(new Course(234145, -1));
-		}
 		return diff;
 	}
 	
@@ -53,42 +41,37 @@ public class CatalogChecker {
 		StringBuilder jsonResult = new StringBuilder();
 		
 		List<Course> missingMandatory = getMissingMandatory();
-		if(missingMandatory.size() != 0) {
+		if (missingMandatory.isEmpty())
+			jsonResult.append("You've completed the mandatory courses\n");
+		else {
 			jsonResult.append("It seems that you haven't completed the following mandatory courses:\n");
-			for(Course course : missingMandatory) {
+			for (Course course : missingMandatory)
 				jsonResult.append(course.getCourseNum() + " ");
-			}
-		} else {
-			jsonResult.append("You've completed the mandatory courses");
+			jsonResult.append("\n");
 		}
 		
 		List<Course> myCore = getMyCore();
-		if(myCore.size() < 3) {
+		if (myCore.size() >= 3)
+			jsonResult.append("You've completed the core courses\n");
+		else {
 			jsonResult.append("It seems that you haven't completed the requirement for core courses\n");
 			jsonResult.append("You possess the following core classes:\n");
-			for (Course corecourse : myCore) {
+			for (Course corecourse : myCore)
 				jsonResult.append(corecourse.getCourseNum() + " ");
-			}
-			
-		} else {
-			jsonResult.append("You've completed the core courses");
+			jsonResult.append("\n");
 		}
-		List<Course> myProject = getMyProject();
-		if(myProject.size() == 0) {
+		if(getMyProject().isEmpty())
 			jsonResult.append("It seems that you haven't completed the requirement for a project\n");
-		}
 		
-		List<Course> myListA = getListA();
-		double myListAPoints = sumPoints(myListA);
-		if(myListAPoints < 15) {
-			jsonResult.append("It seems that you haven't completed the requirement for List A, you are missing "+(15 - myListAPoints)+" points\n");
-		}
+		double myListAPoints = sumPoints(getMyListA());
+		if(myListAPoints < 15)
+			jsonResult.append("It seems that you haven't completed the requirement for List A, you are missing "
+					+ (15 - myListAPoints) + " points\n");
 		
-		List<Course> myListB = getListB();
-		double myListBPoints = sumPoints(myListB);
-		if(myListAPoints + myListBPoints < 28.5) {
-			jsonResult.append("It seems that you haven't completed the requirement for electives, you are missing "+(28.5 - myListAPoints - myListBPoints)+" points\n");
-		}
+		double myListBPoints = sumPoints(getMyListB());
+		if(myListAPoints + myListBPoints < 28.5)
+			jsonResult.append("It seems that you haven't completed the requirement for electives, you are missing "
+					+ (28.5 - myListAPoints - myListBPoints) + " points\n");
 		
 		
 		return jsonResult.toString();
@@ -102,18 +85,14 @@ public class CatalogChecker {
 		//c.getLogger().info("=========== " + query_getMandatory + " ===========");
 		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement stmt = connection.prepareStatement(query_getListA);
-			ResultSet resultSet = stmt.executeQuery();
-			if (!resultSet.isBeforeFirst()) {
-				//c.getLogger().info("=========== NO RESULTS ===========");
+			ResultSet resultSet = connection.prepareStatement(query_getListA).executeQuery();
+			if (!resultSet.isBeforeFirst())
 				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
-			} else {
-				//c.getLogger().info("=========== FOUND RESULTS ===========");
-				while(resultSet.next()) {
+			else
+				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
 					listA.add(new Course(courseNumber, -1));
 				}
-			}
 
 			connection.close();
 			//c.getLogger().info("=========== RETURNING RESULTS ===========");
@@ -122,9 +101,7 @@ public class CatalogChecker {
 	}
 	
 	private List<Course> getMyListA() throws SQLException {
-		List<Course> listA = getListA();
-		List<Course> myListA = intersection(listA, myCourses);
-		return myListA;
+		return intersection(getListA(), myCourses);
 	}
 
 	private List<Course> getListB() throws SQLException{
@@ -135,18 +112,14 @@ public class CatalogChecker {
 		//c.getLogger().info("=========== " + query_getMandatory + " ===========");
 		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement stmt = connection.prepareStatement(query_getListB);
-			ResultSet resultSet = stmt.executeQuery();
-			if (!resultSet.isBeforeFirst()) {
-				//c.getLogger().info("=========== NO RESULTS ===========");
+			ResultSet resultSet = connection.prepareStatement(query_getListB).executeQuery();
+			if (!resultSet.isBeforeFirst())
 				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
-			} else {
-				//c.getLogger().info("=========== FOUND RESULTS ===========");
-				while(resultSet.next()) {
+			else
+				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
 					listB.add(new Course(courseNumber, -1));
 				}
-			}
 
 			connection.close();
 			//c.getLogger().info("=========== RETURNING RESULTS ===========");
@@ -155,9 +128,7 @@ public class CatalogChecker {
 	}
 	
 	private List<Course> getMyListB() throws SQLException {
-		List<Course> listB = getListB();
-		List<Course> myListB = intersection(listB, myCourses);
-		return myListB;
+		return intersection(getListB(), myCourses);
 	}
 
 	private List<Course> getProject() throws SQLException {
@@ -168,18 +139,14 @@ public class CatalogChecker {
 		//c.getLogger().info("=========== " + query_getMandatory + " ===========");
 		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement stmt = connection.prepareStatement(query_getProject);
-			ResultSet resultSet = stmt.executeQuery();
-			if (!resultSet.isBeforeFirst()) {
-				//c.getLogger().info("=========== NO RESULTS ===========");
+			ResultSet resultSet = connection.prepareStatement(query_getProject).executeQuery();
+			if (!resultSet.isBeforeFirst())
 				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
-			} else {
-				//c.getLogger().info("=========== FOUND RESULTS ===========");
-				while(resultSet.next()) {
+			else
+				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
 					project.add(new Course(courseNumber, -1));
 				}
-			}
 
 			connection.close();
 			//c.getLogger().info("=========== RETURNING RESULTS ===========");
@@ -188,8 +155,7 @@ public class CatalogChecker {
 	}
 	
 	private List<Course> getMyProject() throws SQLException{
-		List<Course> project = getProject();
-		return intersection(project, myCourses);
+		return intersection(getProject(), myCourses);
 	}
 	
 	private List<Course> getMandatory() throws SQLException {
@@ -200,18 +166,14 @@ public class CatalogChecker {
 		//c.getLogger().info("=========== " + query_getMandatory + " ===========");
 		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement stmt = connection.prepareStatement(query_getProject);
-			ResultSet resultSet = stmt.executeQuery();
-			if (!resultSet.isBeforeFirst()) {
-				//c.getLogger().info("=========== NO RESULTS ===========");
+			ResultSet resultSet = connection.prepareStatement(query_getProject).executeQuery();
+			if (!resultSet.isBeforeFirst())
 				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
-			} else {
-				//c.getLogger().info("=========== FOUND RESULTS ===========");
-				while(resultSet.next()) {
+			else
+				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
 					mandatory.add(new Course(courseNumber, -1));
 				}
-			}
 
 			connection.close();
 			//c.getLogger().info("=========== RETURNING RESULTS ===========");
@@ -227,18 +189,14 @@ public class CatalogChecker {
 		//c.getLogger().info("=========== " + query_getMandatory + " ===========");
 		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement stmt = connection.prepareStatement(query_getCore);
-			ResultSet resultSet = stmt.executeQuery();
-			if (!resultSet.isBeforeFirst()) {
-				//c.getLogger().info("=========== NO RESULTS ===========");
+			ResultSet resultSet = connection.prepareStatement(query_getCore).executeQuery();
+			if (!resultSet.isBeforeFirst())
 				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
-			} else {
-				//c.getLogger().info("=========== FOUND RESULTS ===========");
-				while(resultSet.next()) {
+			else
+				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
 					core.add(new Course(courseNumber, -1));
 				}
-			}
 
 			connection.close();
 			//c.getLogger().info("=========== RETURNING RESULTS ===========");
@@ -247,38 +205,30 @@ public class CatalogChecker {
 	}
 	
 	private List<Course> getMyCore() throws SQLException{
-		List<Course> core = getCore();
-		List<Course> myCore = intersection(core, myCourses).stream().limit(3).collect(Collectors.toList());
-		return myCore;
+		return intersection(getCore(), myCourses).stream().limit(3).collect(Collectors.toList());
 	}
 	
 	//A - B
 	private List<Course> difference(List<Course> A, List<Course> B) {
-		if(A == null || B == null) {
+		if(A == null || B == null)
 			return null;
-		}
 	    List<Course> rtnList = new ArrayList<>();
-	    for(Course dto : A) {
-	        if(!B.contains(dto)) {
-	            rtnList.add(dto);
-	        }
-	    }
+	    for(Course dto : A)
+			if (!B.contains(dto))
+				rtnList.add(dto);
 	    return rtnList;
 	}
 	
 	private List<Course> intersection(List<Course> A, List<Course> B) {
-		if(A == null || B == null) {
+		if(A == null || B == null)
 			return null;
-		}
 	    List<Course> rtnList = new ArrayList<>();
-	    for(Course dto : A) {
-	    	for(Course dtoB : B) {
-		        if(dtoB.getCourseNum() == dto.getCourseNum()) {
-		            rtnList.add(dtoB);
-		            break;
-		        }
-	    	}
-	    }
+	    for(Course dto : A)
+			for (Course dtoB : B)
+				if (dtoB.getCourseNum() == dto.getCourseNum()) {
+					rtnList.add(dtoB);
+					break;
+				}
 	    return rtnList;
 	}
 	
