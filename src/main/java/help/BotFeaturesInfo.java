@@ -19,13 +19,13 @@ public class BotFeaturesInfo {
 	public static String[] AVAILABLE_PREFIXES = { "The TechnoBot can do the following:\r\n", "I can help you with:\r\n",
 			"I am capable of the following:\r\n", "I can do plenty:\r\n" };
 	private static final String[] FEATURES_ARRAY = {
-			"1. Keep track of homework assignments\r\n\ttry: 'When is my next assigment due'\r\n",
-			"2. Guide to attractions around campus\r\n\ttry: 'when can I go to Junta'\r\n",
-			"3. Search for videos relavant to a course\r\n\ttry:'does course 234319 have a video?'\r\n",
-			"5. Filter courses based on the given info\r\n\ttry: 'filter courses'\r\n",
-			"6. Search for info on courses \r\n\ttry: 'Search class'\r\n",
-			"7. Retrive both prerequisites & postrequisites \r\n\ttry:'Give me the prerequisites of Information Retrieval' or 'What are the postrequisites of Computer Vision?'",
-			"8. Define your own rules & execute them\r\n\ttry:'subscribe to rule homework with username <uname> and password <pwd>' and 'run my rules'", };
+			"Keep track of homework assignments\r\n\ttry: 'When is my next assigment due'\r\n",
+			"Guide to attractions around campus\r\n\ttry: 'when can I go to Junta'\r\n",
+			"Search for videos relavant to a course\r\n\ttry:'does course 234319 have a video?'\r\n",
+			"Filter courses based on the given info\r\n\ttry: 'filter courses'\r\n",
+			"Search for info on courses \r\n\ttry: 'Search class'\r\n",
+			"Retrive both prerequisites & postrequisites \r\n\ttry:'Give me the prerequisites of Information Retrieval' or 'What are the postrequisites of Computer Vision?'",
+			"Define your own rules & execute them\r\n\ttry:'subscribe to rule homework with username <uname> and password <pwd>' and 'run my rules'", };
 
 	public static String[] AVAILABLE_POSTFIXES = { "If you are having problems, please respond \"support\"",
 			"In case you encounter an issue, please respond \"support\"",
