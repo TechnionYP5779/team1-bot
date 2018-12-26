@@ -33,8 +33,7 @@ public class HomeworkGetter {
 			final HtmlPage page2 = button.click();
 			if (page2.getUrl() == page.getUrl())
 				throw new WrongCredentialsException();
-			HtmlPage page3 = page2.getAnchorByText("Homeworks").click();
-			final HtmlTable $ = (HtmlTable) page3.getByXPath("//table[@class='stud-hw-table']").get(0);
+			final HtmlTable $ = (HtmlTable) ((HtmlTable) page2.getAnchorByText("Homeworks").click()).getByXPath("//table[@class='stud-hw-table']").get(0);
 			$.asText();
 			return ExtractHomeworkFromTable($);
 		}
@@ -44,8 +43,7 @@ public class HomeworkGetter {
 		List<Homework> $ = new ArrayList<>();
 		List<HtmlTableRow> homeworkTableRows = homeworkTable.getRows();
 		for (int ¢ = 1; ¢ < homeworkTableRows.size(); ++¢) {
-			Homework h1;
-			h1 = parseHomeworkRow(homeworkTableRows.get(¢));
+			Homework h1 = parseHomeworkRow(homeworkTableRows.get(¢));
 			if (h1 != null)
 				$.add(h1);
 		}
