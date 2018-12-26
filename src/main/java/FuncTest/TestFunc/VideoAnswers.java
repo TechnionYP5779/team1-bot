@@ -10,6 +10,7 @@ import com.microsoft.azure.functions.HttpResponseMessage;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -23,13 +24,17 @@ public class VideoAnswers {
 		if(!params.has("coursenumber")) 
 			return utils.createWebhookResponseContent("I'm sorry I don't know what course you meant\n", s);
 		
-		String query_checkVideo = "select * from dbo.Videos where ID = " + params.getString("coursenumber");
+		String query_checkVideo = "select * from dbo.Videos where ID = ?";
+		
 		StringBuilder jsonResult = new StringBuilder();
 		
 		c.getLogger().info("=========== " + query_checkVideo + " ===========");
 		
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			ResultSet resultSet = connection.createStatement().executeQuery(query_checkVideo);
+			PreparedStatement stmt = connection.prepareStatement(query_checkVideo);
+			stmt.setString(1, params.getString("coursenumber"));
+			
+			ResultSet resultSet = stmt.executeQuery();
 			if (!resultSet.isBeforeFirst()) {
 				c.getLogger().info("=========== NO RESULTS ===========");
 				jsonResult.append(globals.NO_VIDEO_FOUND_ERROR);
@@ -52,19 +57,27 @@ public class VideoAnswers {
 	private static StringBuilder parseVideoResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
 		c.getLogger().info("=========== BUILDING RESULT TEXT ===========");
 		try {
-			while(resultSet.next()) 
-				jsonResult.append("I found a video for course " + resultSet.getInt(1)
-				 + " at " + resultSet.getString(4) + ". ");
+			for (; resultSet.next(); jsonResult.append("\n")) {
+				c.getLogger().info("=========== APPENDING RESULT ===========");
+				int courseNum = resultSet.getInt(1);
 				
-				if(resultSet.getString(3) != "NULL") 
-					jsonResult.append("Also, The type of the video is " + resultSet.getString(3));
+				String filmingDate = trimQuotes(resultSet.getString(2));
 				
+				String courseType = trimQuotes(resultSet.getString(3));
 				
-				if(resultSet.getString(2) != "NULL") 
-					jsonResult.append("And it was filmed at semester " + resultSet.getString(2));
+				String link = trimQuotes(resultSet.getString(4));
 				
-			
-				jsonResult.append("\n");
+				c.getLogger().info("=========== filmingDate: " + filmingDate + " ===========");
+					
+				jsonResult.append(
+						"I found a video for course " + courseNum + " at " + link + ". ");
+				
+				if (!courseType.equals(null) && !"NULL".equals(courseType) && !"'NULL'".equals(courseType))
+					jsonResult.append("Also, The type of the video is " + courseType + ".");
+				
+				if (!filmingDate.equals(null) && !"NULL".equals(filmingDate) && !"'NULL'".equals(filmingDate))
+					jsonResult.append("And it was filmed at semester " + filmingDate + ".");
+			}
 			
 		} catch (SQLException e) {
 			c.getLogger().info("=========== ERROR MSG: " + e.getMessage() + " ===========");
@@ -74,6 +87,17 @@ public class VideoAnswers {
 		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
 		return jsonResult;
 
+	}
+
+	private static String trimQuotes(String str) {
+		if(str == null || str.length() == 0) return str;
+		
+		String newStr = str.charAt(0) != '\'' ? str : str.substring(1);
+		
+		if(str.charAt(str.length()-1) == '\'') 
+			newStr = newStr.substring(0, newStr.length()-1);
+		
+		return newStr;
 	}
 
 }
