@@ -30,7 +30,7 @@ public class CourseObject {
 	private String faculty;
 	private String name;
 	private String id;
-	private Integer academicPoints;
+	private Float academicPoints;
 	private Optional<Integer> lectureHours = Optional.empty();
 	private Optional<Integer> tutorialHours = Optional.empty();
 	private Optional<Integer> labHours = Optional.empty();
@@ -43,10 +43,10 @@ public class CourseObject {
 
 	public CourseObject() {
 		name = id = "N\\A";
-		academicPoints = Integer.valueOf(0);
+		academicPoints = Float.valueOf(0);
 	}
 
-	public CourseObject(String f, String id, String n, Integer ap, Optional<Integer> lHours, Optional<Integer> tHours,
+	public CourseObject(String f, String id, String n, Float ap, Optional<Integer> lHours, Optional<Integer> tHours,
 			Optional<Integer> ph, Optional<Integer> labh, Optional<ExamDate> A, Optional<ExamDate> B) {
 		this.faculty = f;
 		this.id = id;
@@ -160,11 +160,11 @@ public class CourseObject {
 		this.idToFaculty();
 	}
 
-	public Integer getAcademicPoints() {
+	public Float getAcademicPoints() {
 		return academicPoints;
 	}
 
-	public void setAcademicPoints(Integer academicPoints) {
+	public void setAcademicPoints(Float academicPoints) {
 		this.academicPoints = academicPoints;
 	}
 
