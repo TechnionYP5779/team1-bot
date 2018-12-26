@@ -18,6 +18,7 @@ import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
 import postrequsites.PostrequisiteHandler;
+import responses.SuggestionChips;
 import responses.TableResponse;
 
 /**
@@ -30,34 +31,53 @@ public class Function {
 			@HttpTrigger(name = "req", methods = { HttpMethod.GET,
 					HttpMethod.POST }, authLevel = AuthorizationLevel.FUNCTION) HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c) {
-		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
+		c.getLogger().info("=========== OFIR INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
-      case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
-        return getHourByDay(queryResult, s, c);
-      case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
-        return getHourByWeek(queryResult, s, c);
-      case globals.FILTER_COURSES_INTENT_NAME:
-        return getMatchingCoursesResponse(queryResult, s, c);
-      case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
-        return getUpcomingHomework(queryResult, s, c);
-      case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
-			  return getCoursesPrerequisitesByName(queryResult, s, c);
-		  case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
-			  return getCoursesPrerequisitesByNumber(queryResult, s, c);
-      case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
-        return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
-      case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
-        return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
-      case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
-			  return VideoAnswers.checkExists(queryResult, s, c);
-      case globals.HELP_INTENT_NAME:
-          return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
+		case globals.TEST_INTENT:
+			return runTest(queryResult, s, c);
+	      case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
+	        return getHourByDay(queryResult, s, c);
+	      case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
+	        return getHourByWeek(queryResult, s, c);
+	      case globals.FILTER_COURSES_INTENT_NAME:
+	        return getMatchingCoursesResponse(queryResult, s, c);
+	      case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
+	        return getUpcomingHomework(queryResult, s, c);
+	      case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
+				  return getCoursesPrerequisitesByName(queryResult, s, c);
+			  case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
+				  return getCoursesPrerequisitesByNumber(queryResult, s, c);
+	      case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
+	        return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+	      case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
+	        return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+	      case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
+				  return VideoAnswers.checkExists(queryResult, s, c);
+	      case globals.HELP_INTENT_NAME:
+	          return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
 		}
-		
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
 
+	
+	
+	private HttpResponseMessage runTest(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		String[] suggestions = new String[10];
+		suggestions[0] = "1";
+		suggestions[1] = "2";
+		suggestions[2] = "3";
+		suggestions[3] = "4";
+		suggestions[4] = "5";
+		suggestions[5] = "6";
+		suggestions[6] = "7";
+		suggestions[7] = "8";
+		suggestions[8] = "9";
+		suggestions[9] = "10";
+		return SuggestionChips.filterSuggestionChips(s, suggestions, 10);
+	}
+	
 	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
 		c.getLogger().info("=========== FILTER COURSES BY PARAMS ===========");
