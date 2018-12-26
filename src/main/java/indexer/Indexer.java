@@ -209,17 +209,12 @@ public class Indexer {
 	String BooleanRetrieval(String query) {
 		return printPostingList(queryParsing(query));
 	}
-
-	public static void main(String[] args) {
+	
+	public static String indexCourses(String query) {
 		Indexer indexer = new Indexer();
-		System.out.println("Welcome to our indexer");
 		String baseDir = "src/main/java/indexer/", path = baseDir + "Descriptions.txt";
-		System.out.println("Using file: " + path);
 		indexer.InvertedIndex(path);
-		System.out.println("Outputting the index");
-		indexer.serializeIndex(baseDir + "output.txt");
-		System.out.println(indexer.BooleanRetrieval("( java )"));
-		System.out.println("Done!");
+		return indexer.BooleanRetrieval("( java )");
 	}
 
 }
