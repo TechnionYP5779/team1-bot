@@ -13,7 +13,7 @@ public class globals {
 	public static final String COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME = "technion.postrequisites.getByCourseName";
 	public static final String COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME = "technion.postrequisites.getByCourseNumber";
 	public static final String TEST_INTENT = "testIntent";
-
+	public static final String HELP_INTENT_NAME = "technion.help";
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
