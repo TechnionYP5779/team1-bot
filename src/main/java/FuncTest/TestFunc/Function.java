@@ -25,6 +25,18 @@ import responses.TableResponse;
  */
 @SuppressWarnings("static-method")
 public class Function {
+	
+	@FunctionName("TimedFunc")
+	public void run(
+			  @TimerTrigger(name = "keepAliveTrigger", schedule = "0 *&#47;5 * * * *") String timerInfo,
+		      ExecutionContext c)
+	{
+		LoginCredentials lc = new LoginCredentials("itamar.ord", "place holder");
+		HomeworkGetter hg = new HomeworkGetter(lc);
+		c.getLogger().info(hg.getUpcomingHomeworkAsString());
+	}
+	
+	
 	@FunctionName("CoolFunc")
 	public HttpResponseMessage run(
 			@HttpTrigger(name = "req", methods = { HttpMethod.GET,
