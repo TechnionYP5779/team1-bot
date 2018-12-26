@@ -75,7 +75,7 @@ public class Function {
 		suggestions[7] = "8";
 		suggestions[8] = "9";
 		suggestions[9] = "10";
-		return SuggestionChips.filterSuggestionChips(s, suggestions, 10);
+		return SuggestionChips.filterSuggestionChips(s, suggestions, 10,"Choose faculty");
 	}
 	
 	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,

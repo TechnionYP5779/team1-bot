@@ -14,7 +14,7 @@ public class SuggestionChips {
 	private static int maxChipLength = 20;
 	private static List<String> moreSuggestions;
 	
-	public static HttpResponseMessage filterSuggestionChips(HttpRequestMessage<Optional<String>> s, String[] suggestions, int numSuggestions) {
+	public static HttpResponseMessage filterSuggestionChips(HttpRequestMessage<Optional<String>> s, String[] suggestions, int numSuggestions,String displayText) {
 		boolean needMore = ( numSuggestions > maxChipsNum ) ? true : false;
 		int possibleChipsHint = ( numSuggestions > maxChipsNum ) ? maxChipsNum : numSuggestions; 
 		moreSuggestions = new ArrayList<>();
@@ -37,12 +37,16 @@ public class SuggestionChips {
 			suggestionsArray.put(new JSONObject().put("title", "allOptions"));
 		}
 		
-		JSONArray items = new JSONArray();
-		items.put(new JSONObject().put("simpleResponse", new JSONObject().put("textToSpeech","Which faculty do you wish to filter by?").put("displayText","Which faculty do you wish to filter by?")));
-		JSONObject inputPrompt = new JSONObject().put("richInitialPrompt", new JSONObject().put("items", items).put("suggestions",suggestionsArray));
+		JSONArray items = new JSONArray()
+				.put(new JSONObject()
+						.put("simpleResponse", new JSONObject()
+								.put("textToSpeech",displayText)
+								.put("displayText",displayText)));
+		JSONObject inputPrompt = new JSONObject().put("richInitialPrompt", new JSONObject()
+				.put("items", items)
+				.put("suggestions",suggestionsArray));
 		JSONArray expectedInputs = new JSONArray();
-		expectedInputs.put(new JSONObject().put("inputPrompt", inputPrompt));
-		expectedInputs.put(new JSONObject().put("possibleIntents", new JSONArray().put(new JSONObject().put("intent", "actions.intent.TEXT"))));
+		expectedInputs.put(new JSONObject().put("inputPrompt", inputPrompt).put("possibleIntents", new JSONArray().put(new JSONObject().put("intent", "actions.intent.TEXT"))));
 		
 		// return the response based on the chips created
 		return s.createResponseBuilder(HttpStatus.OK)
