@@ -8,6 +8,7 @@ public class globals {
 	public static final String BUSINESS_HOUR_WEEK_INTENT_NAME = "technion.businesses.fullweek";
 	public static final String FILTER_COURSES_INTENT_NAME = "technion.courses.filter - examA";
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
+	public static final String VIDEOS_CHECK_EXISTS_INTENT_NAME = "technion.courses.video.checkexistance";
 	public static final String PREREQUISITES_GET_BY_NAME_INTENT_NAME = "technion.prerequisites.getByCourseName";
 	public static final String PREREQUISITES_GET_BY_NUMBER_INTENT_NAME = "technion.prerequisites.getByCourseNumber";
 	public static final String COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME = "technion.postrequisites.getByCourseName";
@@ -25,6 +26,9 @@ public class globals {
 			"jdbc:sqlserver://%s:1433;database=%s;user=%s;password=%s;encrypt=true;"
 					+ "hostNameInCertificate=*.database.windows.net;loginTimeout=30;",
 			"technobotserver.database.windows.net", "technobot", "techazure2@technobotserver", "TechnionBot1234");
+
+	public static final Object NO_VIDEO_FOUND_ERROR = "No videos where found. It could be that the course-number does represent an actual course"
+			+ ", or perhaps no video was recorded";
 	public static final int COURSE_FILTER_LIMIT = 15;
 	
 }

@@ -5,9 +5,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-//import java.util.ArrayList;
 import java.util.Arrays;
-//import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.json.JSONObject;
@@ -31,13 +30,12 @@ public class PostrequisiteHandler {
 			if (!utils.allParametersArePresent(parameters, Arrays.asList("courseNum"))) {
 				c.getLogger().info("ERROR::PostrequisiteHandler::Missing parameters");
 				return utils.createWebhookResponseContent(SERVER_ERROR, s);
-				
 			}
 			int courseNum = parameters.getInt("courseNum");
 			Course course = extractCourseInfo(courseNum);
-			if(course.isInvalid()) 
-				return utils.createWebhookResponseContent("There is no course with id " +courseNum + ", please try again." , s);
-			return getPostrequisites(s, course);
+			return !course.isInvalid() ? getPostrequisites(s, course)
+					: utils.createWebhookResponseContent(
+							"There is no course with id " + courseNum + ", please try again.", s);
 		} catch (SQLException e) {
 			c.getLogger().info("ERROR::PostrequisiteHandler::SQL Exception");
 			c.getLogger().info(e.toString());
@@ -50,10 +48,8 @@ public class PostrequisiteHandler {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			PreparedStatement ps = connection.prepareStatement("Select ID,Name From Courses WHERE Courses.ID = ?;");
 			ps.setInt(1, courseNum);
-			ResultSet rs =  ps.executeQuery();
-			if(!rs.next())
-				return Course.INVALID_COURSE;
-			return new Course(rs.getString(2),rs.getInt(1));
+			ResultSet rs = ps.executeQuery();
+			return !rs.next() ? Course.INVALID_COURSE : new Course(rs.getString(2), rs.getInt(1));
 		}
 	}
 	
@@ -65,14 +61,13 @@ public class PostrequisiteHandler {
 			JSONObject parameters = queryResult.getJSONObject("parameters");
 			if (!utils.allParametersArePresent(parameters, Arrays.asList("courseName"))) {
 				c.getLogger().info("ERROR::PostrequisiteHandler::Missing parameters");
-				return utils.createWebhookResponseContent(SERVER_ERROR, s);	
+				return utils.createWebhookResponseContent(SERVER_ERROR, s);
 			}
 			String courseName = parameters.getString("courseName");
 			Course course = extractCourseInfo(courseName);
-			if(course.isInvalid()) 
-				return utils.createWebhookResponseContent("There is no course named " +courseName+ ", please try again." , s);
-
-			return getPostrequisites(s, course);
+			return !course.isInvalid() ? getPostrequisites(s, course)
+					: utils.createWebhookResponseContent(
+							"There is no course named " + courseName + ", please try again.", s);
 		} catch(SQLException e) {
 			c.getLogger().info("ERROR::PostrequisiteHandler::SQL Exception");
 			c.getLogger().info(e.toString());
@@ -85,20 +80,19 @@ public class PostrequisiteHandler {
 			PreparedStatement ps = connection.prepareStatement("Select ID,Name From Courses WHERE Courses.Name = ?");
 			ps.setString(1, courseName);
 			ResultSet rs = ps.executeQuery();
-			if(!rs.next())
-				return Course.INVALID_COURSE;
-			return new Course(rs.getString(2),rs.getInt(1));
+			return !rs.next() ? Course.INVALID_COURSE : new Course(rs.getString(2), rs.getInt(1));
 		}
 	}
 
 	private static HttpResponseMessage getPostrequisites(HttpRequestMessage<Optional<String>> s, Course c) throws SQLException {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
-			PreparedStatement ps = connection.prepareStatement("Select ID,Name From ( SELECT PostrequisiteID FROM Postrequisites WHERE CourseID = ? ) as PostIDs LEFT JOIN Courses ON PostIDs.PostrequisiteID = Courses.ID;");
+			PreparedStatement ps = connection.prepareStatement(
+					"Select ID,Name From ( SELECT PostrequisiteID FROM Postrequisites WHERE CourseID = ? ) as PostIDs LEFT JOIN Courses ON PostIDs.PostrequisiteID = Courses.ID;");
 			ps.setInt(1, c.getId());
 			ResultSet rs = ps.executeQuery();
-			if(!rs.isBeforeFirst()) 
-				return utils.createWebhookResponseContent("There are no postrequisites for " +c.getName()+ "." , s);
-			return TableResponse.quaryTableResponse(s, "The postrequisites for " + c.getName() +" are:", rs);
+			return rs.isBeforeFirst()
+					? TableResponse.quaryTableResponse(s, "The postrequisites for " + c.getName() + " are:", rs)
+					: utils.createWebhookResponseContent("There are no postrequisites for " + c.getName() + ".", s);
 		}
 	}
 }

@@ -49,6 +49,8 @@ public class Function {
         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+      case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
+			  return VideoAnswers.checkExists(queryResult, s, c);
       case globals.HELP_INTENT_NAME:
           return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
 		}
