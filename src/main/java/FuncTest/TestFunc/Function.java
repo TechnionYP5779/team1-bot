@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
@@ -11,6 +12,7 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import degree.CatalogChecker;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
@@ -35,8 +37,31 @@ public class Function {
 			return getHourByWeek(queryResult, s, c);
 		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
 			return getUpcomingHomework(queryResult, s, c);
+		case globals.FINISH_DEGREE_INTENT_NAME:
+			return calculateDegreeProgress(queryResult, s, c);
 		}
 		return utils.createWebhookResponseContent("what is this intent?", s);
+	}
+
+	private HttpResponseMessage calculateDegreeProgress(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		c.getLogger().info("=========== FINISH DEGREE INTENT ===========");
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		
+		if (!utils.allParametersArePresent(parameters, Arrays.asList("ID", "code")))
+			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
+		
+		String ID = parameters.getString("ID"), code = parameters.getString("code");
+		LoginCredentials lc = new LoginCredentials(ID,  code);
+		CatalogChecker cc = new CatalogChecker(c, lc);
+		
+				
+		try {
+			return utils.createWebhookResponseContent(cc.degreeCompletionCompute(), s);
+		} catch (SQLException e) {
+			c.getLogger().info("==================" + e.getMessage() + "====================");
+			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
+		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,

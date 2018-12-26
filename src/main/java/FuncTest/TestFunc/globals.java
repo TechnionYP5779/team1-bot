@@ -7,7 +7,9 @@ public class globals {
 	public static final String BUSINESS_HOUR_BY_DAY_INTENT_NAME = "technion.businesses.getSpecific";
 	public static final String BUSINESS_HOUR_WEEK_INTENT_NAME = "technion.businesses.fullweek";
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
+	public static final String FINISH_DEGREE_INTENT_NAME = "technion.degree.helpFinish";
 	public static final String TEST_INTENT = "testIntent";
+
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
@@ -16,5 +18,6 @@ public class globals {
 			"jdbc:sqlserver://%s:1433;database=%s;user=%s;password=%s;encrypt=true;"
 					+ "hostNameInCertificate=*.database.windows.net;loginTimeout=30;",
 			"technobotserver.database.windows.net", "technobot", "techazure2@technobotserver", "TechnionBot1234");
-	public static final String MISSING_MANDATORY_COURSES_ERROR = "No mandatory courses found\n"; 
+	public static final String MISSING_MANDATORY_COURSES_ERROR = "No mandatory courses found\n";
+	public static final String GENERIC_ERR_MSG = "I'm sorry, something wen\'t wrong";
 }

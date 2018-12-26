@@ -49,16 +49,10 @@ public class CatalogChecker {
 		return diff;
 	}
 	
-	public List<Course> computeMissingMandatory(List<Course> courses) {
-		List<Course> mandatory = getMissingMandatory();
-		
-		return courses;
-	}
-	
-	public StringBuilder degreeCompletionCompute(List<Course> courses) throws SQLException {
+	public String degreeCompletionCompute() throws SQLException {
 		StringBuilder jsonResult = new StringBuilder();
 		
-		List<Course> missingMandatory = computeMissingMandatory(courses);
+		List<Course> missingMandatory = getMissingMandatory();
 		if(missingMandatory.size() != 0) {
 			jsonResult.append("It seems that you haven't completed the following mandatory courses:\n");
 			for(Course course : missingMandatory) {
@@ -97,7 +91,7 @@ public class CatalogChecker {
 		}
 		
 		
-		return null;
+		return jsonResult.toString();
 	}
 		
 	private List<Course> getListA() throws SQLException{
