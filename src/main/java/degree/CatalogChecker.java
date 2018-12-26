@@ -21,13 +21,84 @@ public class CatalogChecker {
 	List<Course> myCourses;
 	List<Course> coreCourses;
 	
-	
 	public CatalogChecker(ExecutionContext c, LoginCredentials creds) {
 		this.c = c;
 		CourseListGetter clg = new CourseListGetter(creds);
 		myCourses = clg.getCourseList();
 	}
 	
+	public double sumPoints(List<Course> list){
+		return list.stream().map(c -> c.getPoints()).reduce(0.0, (x,y) -> x+y);
+	}
+	
+	public List<Course> getMissingMandatory() {
+		List<Course> mandatory = null;
+		try {
+			mandatory = getMandatory();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		List<Course> diff = difference(mandatory, myCourses);
+		if(myCourses.contains(new Course(234145, -1))){
+			diff.remove(new Course(44145, -1));
+		}
+		if(myCourses.contains(new Course(44145, -1))){
+			diff.remove(new Course(234145, -1));
+		}
+		return diff;
+	}
+	
+	public List<Course> computeMissingMandatory(List<Course> courses) {
+		List<Course> mandatory = getMissingMandatory();
+		
+		return courses;
+	}
+	
+	public StringBuilder degreeCompletionCompute(List<Course> courses) throws SQLException {
+		StringBuilder jsonResult = new StringBuilder();
+		
+		List<Course> missingMandatory = computeMissingMandatory(courses);
+		if(missingMandatory.size() != 0) {
+			jsonResult.append("It seems that you haven't completed the following mandatory courses:\n");
+			for(Course course : missingMandatory) {
+				jsonResult.append(course.getCourseNum() + " ");
+			}
+		} else {
+			jsonResult.append("You've completed the mandatory courses");
+		}
+		
+		List<Course> myCore = getMyCore();
+		if(myCore.size() < 3) {
+			jsonResult.append("It seems that you haven't completed the requirement for core courses\n");
+			jsonResult.append("You possess the following core classes:\n");
+			for (Course corecourse : myCore) {
+				jsonResult.append(corecourse.getCourseNum() + " ");
+			}
+			
+		} else {
+			jsonResult.append("You've completed the core courses");
+		}
+		List<Course> myProject = getMyProject();
+		if(myProject.size() == 0) {
+			jsonResult.append("It seems that you haven't completed the requirement for a project\n");
+		}
+		
+		List<Course> myListA = getListA();
+		double myListAPoints = sumPoints(myListA);
+		if(myListAPoints < 15) {
+			jsonResult.append("It seems that you haven't completed the requirement for List A, you are missing "+(15 - myListAPoints)+" points\n");
+		}
+		
+		List<Course> myListB = getListB();
+		double myListBPoints = sumPoints(myListB);
+		if(myListAPoints + myListBPoints < 28.5) {
+			jsonResult.append("It seems that you haven't completed the requirement for electives, you are missing "+(28.5 - myListAPoints - myListBPoints)+" points\n");
+		}
+		
+		
+		return null;
+	}
 		
 	private List<Course> getListA() throws SQLException{
 		List<Course> listA = new ArrayList<Course>();
@@ -187,28 +258,6 @@ public class CatalogChecker {
 		return myCore;
 	}
 	
-	public double sumPoints(List<Course> list){
-		return list.stream().map(c -> c.getPoints()).reduce(0.0, (x,y) -> x+y);
-	}
-	
-	public List<Course> getMissingMandatory() {
-		List<Course> mandatory = null;
-		try {
-			mandatory = getMandatory();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		List<Course> diff = difference(mandatory, myCourses);
-		if(myCourses.contains(new Course(234145, -1))){
-			diff.remove(new Course(44145, -1));
-		}
-		if(myCourses.contains(new Course(44145, -1))){
-			diff.remove(new Course(234145, -1));
-		}
-		return diff;
-	}
-	
 	//A - B
 	private List<Course> difference(List<Course> A, List<Course> B) {
 		if(A == null || B == null) {
@@ -239,58 +288,5 @@ public class CatalogChecker {
 	    return rtnList;
 	}
 	
-	public List<Course> computeMissingMandatory(List<Course> courses) {
-		List<Course> mandatory = getMissingMandatory();
-		
-		return courses;
-	}
 	
-	StringBuilder degreeCompletionCompute(List<Course> courses) throws SQLException {
-		StringBuilder jsonResult = new StringBuilder();
-		
-		List<Course> missingMandatory = computeMissingMandatory(courses);
-		if(missingMandatory.size() != 0) {
-			jsonResult.append("It seems that you haven't completed the following mandatory courses:\n");
-			for(Course course : missingMandatory) {
-				jsonResult.append(course.getCourseNum() + " ");
-			}
-		} else {
-			jsonResult.append("You've completed the mandatory courses");
-		}
-		
-		List<Course> myCore = getMyCore();
-		if(myCore.size() < 3) {
-			jsonResult.append("It seems that you haven't completed the requirement for core courses\n");
-			jsonResult.append("You possess the following core classes:\n");
-			for (Course corecourse : myCore) {
-				jsonResult.append(corecourse.getCourseNum() + " ");
-			}
-			
-		} else {
-			jsonResult.append("You've completed the core courses");
-		}
-		List<Course> myProject = getMyProject();
-		if(myProject.size() == 0) {
-			jsonResult.append("It seems that you haven't completed the requirement for a project\n");
-		}
-		
-		List<Course> myListA = getListA();
-		double myListAPoints = sumPoints(myListA);
-		if(myListAPoints < 15) {
-			jsonResult.append("It seems that you haven't completed the requirement for List A, you are missing "+(15 - myListAPoints)+" points\n");
-		}
-		
-		List<Course> myListB = getListB();
-		double myListBPoints = sumPoints(myListB);
-		if(myListAPoints + myListBPoints < 28.5) {
-			jsonResult.append("It seems that you haven't completed the requirement for electives, you are missing "+(28.5 - myListAPoints - myListBPoints)+" points\n");
-		}
-		
-		
-		
-		
-		
-		return null;
-	}
-
 }
