@@ -74,7 +74,7 @@ public class CourseListGetter {
 	
 	private boolean checkCourseAlreadyExist(Course toCheck, List<Course> courseList) {
 		for(Course course : courseList)
-			if (course.getCourseNum().equals(toCheck.getCourseNum()))
+			if (course.getCourseNum() == toCheck.getCourseNum())
 				return true;
 		return false;
 	}
@@ -105,7 +105,7 @@ public class CourseListGetter {
 			return null;
 		String courseName = courseRow.getCell(2).asText(),
 				courseNumber = extractCourseNumber(courseName);
-		return "".equals(courseNumber) ? null : new Course(courseNumber, Double.valueOf(courseRow.getCell(1).asText()));
+		return "".equals(courseNumber) ? null : new Course(Integer.valueOf(courseNumber), Double.valueOf(courseRow.getCell(1).asText()));
 	}
 	
 	private String extractCourseNumber(final String s) {

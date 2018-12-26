@@ -2,14 +2,14 @@ package degree;
 
 public class Course {
 	//Can only work with course numbers for now, because it is with Hebrew in Tadpis
-	private final String courseNum;
+	private final int courseNum;
 	private boolean isProject;
 	private boolean isListA;
 	private boolean isListB;
 	private boolean isRequired;
 	private double points;
 	
-	public Course(String courseNum, double points) {
+	public Course(int courseNum, double points) {
 		this.courseNum = courseNum;
 		this.points = points;
 		this.isListA = false;
@@ -50,7 +50,7 @@ public class Course {
 		return this.isRequired;
 	}
 		
-	public String getCourseNum() {
+	public int getCourseNum() {
 		return this.courseNum;
 	}
 	
@@ -65,5 +65,10 @@ public class Course {
 		string.append(" - ");
 		string.append(points);
 		return string + "";	
-	}	
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return ((Course)obj).getCourseNum() == courseNum;
+	}
 }

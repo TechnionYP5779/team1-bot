@@ -16,4 +16,5 @@ public class globals {
 			"jdbc:sqlserver://%s:1433;database=%s;user=%s;password=%s;encrypt=true;"
 					+ "hostNameInCertificate=*.database.windows.net;loginTimeout=30;",
 			"technobotserver.database.windows.net", "technobot", "techazure2@technobotserver", "TechnionBot1234");
+	public static final String MISSING_MANDATORY_COURSES_ERROR = "No mandatory courses found\n"; 
 }

@@ -23,35 +23,29 @@ public class CatalogParser {
 	private String ignoreSpringCatalogToken="אביב:דיהם בסמסטר ולסטודנטים אשר התחילו לימ\r\n";
 	
 	public void getWhatNeeded(String catalogName) {
-		List<String> semesters = getSemesters(getCatalog(catalogName));
-		List<String> requiredCourses = getRequiredCourses(semesters);
-		for(String course : requiredCourses) {
+		List<String> semesters = getSemesters(getCatalog(catalogName)), requiredCourses = getRequiredCourses(semesters);
+		for(String course : requiredCourses)
 			System.out.println(course);
-		}
 		System.out.println(requiredCourses.size());
 	}
 	
 	public List<String> getRequiredCourses(List<String> semesters){
 		ArrayList<String> courses = new ArrayList<>();
-		for(String semester : semesters) {
+		for(String semester : semesters)
 			courses.addAll(getRequiredCoursesInSemester(semester));
-		}
 		return courses;
 	}
 	
 	public List<String> getRequiredCoursesInSemester(String semester){
-		ArrayList<String> courses = new ArrayList<>();
-		//Courses that can be "THIS" or "THAT" FOR now i remove them later on I will save them.
-		ArrayList<String> dupCourses = new ArrayList<>();
+		ArrayList<String> courses = new ArrayList<>(), dupCourses = new ArrayList<>();
 		Matcher matcher = Pattern.compile("(\\d{6}/)").matcher(semester);
 		while(matcher.find()) {
 			String courseNum = matcher.group();
 			dupCourses.add(courseNum.substring(0, courseNum.length()-1));
 		}
 		matcher = Pattern.compile("(\\d{6})").matcher(semester);
-		while(matcher.find()) {
+		while(matcher.find())
 			courses.add(matcher.group());
-		}
 		courses.removeAll(dupCourses);
 		return courses;
 	}
@@ -59,9 +53,8 @@ public class CatalogParser {
 	public List<String> getSemesters(String catalogDetails) {
 		ArrayList<String> semesters = new ArrayList<>();
 		String[] tokens = catalogDetails.split(semsterToken);
-		for(int i = 1; i < tokens.length; i++) {
+		for(int i = 1; i < tokens.length; ++i)
 			semesters.add(tokens[i]);
-		}
 		return semesters;
 	}
 	
@@ -76,10 +69,8 @@ public class CatalogParser {
 	
 	public static String convertPDFToTxt(String filePath) {
 		try {
-			byte[] pdfFileBytes = readFileAsBytes(filePath);
-			PDDocument pdDoc = PDDocument.load(pdfFileBytes);
-			PDFTextStripper reader = new PDFTextStripper();
-			String pageText = reader.getText(pdDoc);
+			PDDocument pdDoc = PDDocument.load(readFileAsBytes(filePath));
+			String pageText = new PDFTextStripper().getText(pdDoc);
 			pdDoc.close();
 			return pageText;
 		} catch (IOException e) {
@@ -93,10 +84,7 @@ public class CatalogParser {
 	}
 	
 	private String getEndTokenOfCatalog(String catalog) {
-		if(catalog == CatalogParser.CATALOG_SOFTWARE_ENGINEERING) {
-			return CATALOG_SOFTWARE_ENGINEERING_END;
-		}
-		return null;
+		return catalog != CatalogParser.CATALOG_SOFTWARE_ENGINEERING ? null : CATALOG_SOFTWARE_ENGINEERING_END;
 	}
 	
 	
