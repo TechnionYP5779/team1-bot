@@ -214,7 +214,7 @@ public class Indexer {
 		Indexer indexer = new Indexer();
 		String baseDir = "src/main/java/indexer/", path = baseDir + "Descriptions.txt";
 		indexer.InvertedIndex(path);
-		return indexer.BooleanRetrieval("( java )");
+		return indexer.BooleanRetrieval(query);
 	}
 
 }
