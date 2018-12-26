@@ -64,6 +64,7 @@ public class utils {
 				.header("Content-Type", "application/json; charset=UTF-8").header("Accept", "application/json").build();
 	}
 
+  
 	protected static String buildPrerequisitesQueryByName(String courseName) {
 		return "select prereq from dbo.Courses" + (courseName == null ? "" : " where name = " + quote(courseName));
 	}
