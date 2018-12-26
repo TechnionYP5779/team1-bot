@@ -19,11 +19,16 @@ public class globals {
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
-	public static final String MISSING_MANDATORY_COURSES_ERROR = "No mandatory courses found\n";
 	public static final String MISSING_DAY_PARAM = "Please specify a day\n";
 	public static final String GENERIC_ERR_MSG = "I'm sorry, something wen\'t wrong";
 	//globals for course filter
 	public static final String NO_COURSES_FOUND_ERROR = "I'm Sorry, I couldn't find any courses matching your request";
+	//globals for degreeHelper
+	public static final String MISSING_MANDATORY_COURSES_ERROR = "No mandatory courses found\n";
+	public static final String MISSING_LISTA_COURSES_ERROR = "No list A courses found\n";
+	public static final String MISSING_LISTB_COURSES_ERROR = "No list B courses found\n";
+	public static final String MISSING_PROJECT_COURSES_ERROR = "No project courses found\n";
+	public static final String MISSING_CORE_COURSES_ERROR = "No core courses found\n";
 	//connection string
 	public static final String CONNECTION_STRING = String.format(
 			"jdbc:sqlserver://%s:1433;database=%s;user=%s;password=%s;encrypt=true;"

@@ -21,6 +21,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.microsoft.azure.functions.ExecutionContext;
 
 import homework.LoginCredentials;
 
@@ -29,17 +30,20 @@ public class CourseListGetter {
 	private static String DID_NOT_COMPLETE = "לא השלים";
 	private static String DID_NOT_DO = "-";
 	private List<Course> courseList = new ArrayList<>();
+	private ExecutionContext c;
 	
-	public CourseListGetter(LoginCredentials creds) {
+	public CourseListGetter(LoginCredentials creds, ExecutionContext c) {
+		this.c = c;
 		try {
 			java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 			this.courseList = getCourseList(creds);
 		} catch (IOException e) {
 			e.printStackTrace();
+			c.getLogger().info("==================" + e.getMessage() + "====================");
 		}
 	}
 	
-	private List<Course> getCourseList(LoginCredentials c) throws IOException{
+	private List<Course> getCourseList(LoginCredentials cred) throws IOException{
 		List<HtmlTable> semesterTables;
 		try(WebClient webClient = new WebClient(BrowserVersion.CHROME)) {
 			webClient.getOptions().setUseInsecureSSL(true);
@@ -62,11 +66,12 @@ public class CourseListGetter {
 				HtmlSubmitInput submitButton = form.getInputByValue("Signon");
 				HtmlTextInput usernameField = form.getInputByName("userid");
 				HtmlPasswordInput passwordField = form.getInputByName("password");
-				usernameField.type(c.getUsername());
-				passwordField.type(c.getPassword());
+				usernameField.type(cred.getUsername());
+				passwordField.type(cred.getPassword());
 				semesterTables = ((DomNode) submitButton.click()).getByXPath("//table[@class='tab']");
 			}catch(ElementNotFoundException e) {
 				semesterTables = page.getByXPath("//table[@class='tab']");
+				c.getLogger().info("==================" + e.getMessage() + "====================");
 			}
 			return extractCourseListFromTables(semesterTables);
 		}

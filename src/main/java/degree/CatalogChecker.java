@@ -21,7 +21,7 @@ public class CatalogChecker {
 	
 	public CatalogChecker(ExecutionContext c, LoginCredentials creds) {
 		this.c = c;
-		myCourses = (new CourseListGetter(creds)).getCourseList();
+		myCourses = (new CourseListGetter(creds, c)).getCourseList();
 	}
 	
 	public double sumPoints(final List<Course> list){
@@ -87,7 +87,7 @@ public class CatalogChecker {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.prepareStatement(query_getListA).executeQuery();
 			if (!resultSet.isBeforeFirst())
-				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
+				jsonResult.append(globals.MISSING_LISTA_COURSES_ERROR);
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
@@ -114,7 +114,7 @@ public class CatalogChecker {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.prepareStatement(query_getListB).executeQuery();
 			if (!resultSet.isBeforeFirst())
-				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
+				jsonResult.append(globals.MISSING_LISTB_COURSES_ERROR);
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
@@ -141,7 +141,7 @@ public class CatalogChecker {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.prepareStatement(query_getProject).executeQuery();
 			if (!resultSet.isBeforeFirst())
-				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
+				jsonResult.append(globals.MISSING_PROJECT_COURSES_ERROR);
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
@@ -191,7 +191,7 @@ public class CatalogChecker {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.prepareStatement(query_getCore).executeQuery();
 			if (!resultSet.isBeforeFirst())
-				jsonResult.append(globals.MISSING_MANDATORY_COURSES_ERROR);
+				jsonResult.append(globals.MISSING_CORE_COURSES_ERROR);
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
