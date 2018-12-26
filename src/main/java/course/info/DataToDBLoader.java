@@ -30,7 +30,7 @@ public class DataToDBLoader {
 				String facultyName = course.getString("faculty");
 				String courseName = course.getString("name");
 				Integer courseId = Integer.valueOf(course.getString("id"));
-				Integer academicPoints = Integer.valueOf(course.getString("academicPoints"));
+				Float academicPoints = Float.valueOf(course.getString("academicPoints"));
 				Integer lectureHours = Integer.valueOf(course.getString("lectureHours"));
 				Integer tutorialHours = Integer.valueOf(course.getString("tutorialHours"));
 				Integer labHours = Integer.valueOf(course.getString("labHours"));
@@ -51,7 +51,7 @@ public class DataToDBLoader {
 					pstmt.setString(1, facultyName);
 					pstmt.setString(2, courseName);
 					pstmt.setInt(3, courseId.intValue());
-					pstmt.setInt(4, academicPoints.intValue());
+					pstmt.setFloat(4, academicPoints.floatValue());
 					pstmt.setInt(5, lectureHours.intValue());
 					pstmt.setInt(6, tutorialHours.intValue());
 					pstmt.setInt(7, labHours.intValue());
@@ -75,6 +75,11 @@ public class DataToDBLoader {
 			e.printStackTrace();
 		}
 	}
+	
+//	public static void main (String[] args) {
+//		DataToDBLoader.loadToDBFromJson("courseInfo.json");
+//	}
+	
 //
 //	//coverts 6.2.2019 to 2019-2-6
 //	private static String transformDate(String s) {
