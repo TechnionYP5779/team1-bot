@@ -63,10 +63,6 @@ public class utils {
 								.toString().getBytes())
 				.header("Content-Type", "application/json; charset=UTF-8").header("Accept", "application/json").build();
 	}
-	
-	private static String quote(String s) {
-		return "\'" + s + "\'";
-	}
 
 	protected static String buildPrerequisitesQueryByName(String courseName) {
 		return "select prereq from dbo.Courses" + (courseName == null ? "" : " where name = " + quote(courseName));

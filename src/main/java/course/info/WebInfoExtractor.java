@@ -32,7 +32,7 @@ public class WebInfoExtractor {
 
 					String id = ((course.getInt("id") < 100000 ? "0" : "") + course.getInt("id")),
 							cName = course.getString("name");
-					Integer ap = Integer.valueOf(course.getInt("academicPoints"));
+					Float ap = Float.valueOf(course.getFloat(("academicPoints")));
 					JSONObject weeklyHours = course.getJSONObject("weeklyHours");
 					Optional<Integer> lh = Optional.empty(), th = Optional.empty(), ph = Optional.empty(),
 							labh = Optional.empty();
@@ -208,8 +208,8 @@ public class WebInfoExtractor {
 
 //	public static void main(String[] args) {
 //		System.out.println("In main");
-////	  WebInfoExtractor.writeCsvFile("courseInfo.csv", WebInfoExtractor.getCourseData());
-//		getCourseDescriptionToJSON("CourseDesc.json");
+//	  WebInfoExtractor.writeCsvFile("courseInfo.csv", WebInfoExtractor.getCourseData());
+////		getCourseDescriptionToJSON("CourseDesc.json");
 //	}
 
 }
