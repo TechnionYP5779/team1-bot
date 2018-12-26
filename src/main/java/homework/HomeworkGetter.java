@@ -44,8 +44,7 @@ public class HomeworkGetter {
 		List<Homework> $ = new ArrayList<>();
 		List<HtmlTableRow> homeworkTableRows = homeworkTable.getRows();
 		for (int ¢ = 1; ¢ < homeworkTableRows.size(); ++¢) {
-			Homework h1;
-			h1 = parseHomeworkRow(homeworkTableRows.get(¢));
+			Homework h1 = parseHomeworkRow(homeworkTableRows.get(¢));
 			if (h1 != null)
 				$.add(h1);
 		}

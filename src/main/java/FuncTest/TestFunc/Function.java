@@ -164,11 +164,11 @@ public class Function {
 			resultSet.next();
 			String pre = resultSet.getString(1);
 			c.getLogger().info(pre);
-			Integer count = 1;
+			int count = 1;
 			String allOptions[] = pre.split("(\\|)");
 			for(String opt : allOptions) {
 				String anOption[] = opt.split("(&)");
-				jsonResult.append(count.toString() + ") ");
+				jsonResult.append(count + ") ");
 				for(String course : anOption)
 					jsonResult.append(course + " AND ");
 				jsonResult.delete(jsonResult.length() - 5, jsonResult.length() - 1);

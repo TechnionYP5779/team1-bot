@@ -24,51 +24,36 @@ public class CSVPusher {
 				BufferedReader br = new BufferedReader(new FileReader(csvName))) { 
 			PreparedStatement pstmt = connection
 					.prepareStatement("INSERT INTO dbo.Videos VALUES(? ,? ,? ,?)");
-			for (String line = br.readLine(); line != null;) {
-		    	
+			for (String line = br.readLine(); line != null;)
 				try {
-						if(line.charAt(0) == '#') {
-							line = br.readLine();
-							continue;
-						}
-						
-						System.out.println(line);
-						System.out.println();
-					
-						
-						
-						String courseId = line.substring(0, line.indexOf(','));
-						line = line.substring(courseId.length() + 1);
-						System.out.println(courseId);
-						
-						String filmingDate = line.substring(0, line.indexOf(','));
-						line = line.substring(filmingDate.length() + 1);
-						System.out.println(filmingDate);
-						
-						String type = line.substring(0, line.indexOf(','));
-						line = line.substring(type.length() + 1);
-						System.out.println(type);
-						
-						String link = line;
-						System.out.println(link);
-						
-						pstmt.setInt(1, Integer.valueOf(courseId).intValue());
-						pstmt.setString(2, filmingDate);
-						pstmt.setString(3, type);
-						pstmt.setString(4, link);
-						pstmt.addBatch();
-						
-						System.out.println("================================================");
-						
-						//pstmt.executeUpdate();
-						
+					if (line.charAt(0) == '#') {
 						line = br.readLine();
-		
+						continue;
+					}
+					System.out.println(line);
+					System.out.println();
+					String courseId = line.substring(0, line.indexOf(','));
+					line = line.substring(courseId.length() + 1);
+					System.out.println(courseId);
+					String filmingDate = line.substring(0, line.indexOf(','));
+					line = line.substring(filmingDate.length() + 1);
+					System.out.println(filmingDate);
+					String type = line.substring(0, line.indexOf(','));
+					line = line.substring(type.length() + 1);
+					System.out.println(type);
+					String link = line;
+					System.out.println(link);
+					pstmt.setInt(1, Integer.valueOf(courseId).intValue());
+					pstmt.setString(2, filmingDate);
+					pstmt.setString(3, type);
+					pstmt.setString(4, link);
+					pstmt.addBatch();
+					System.out.println("================================================");
+					line = br.readLine();
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					line = br.readLine();
 				}
-			}
 			
 			pstmt.executeBatch();
 			connection.commit();

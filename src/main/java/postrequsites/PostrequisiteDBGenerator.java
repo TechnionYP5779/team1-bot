@@ -52,9 +52,7 @@ public class PostrequisiteDBGenerator {
 			s.setInt(1, Integer.parseInt(postreqPair.getLeft()));
 			s.setInt(2, Integer.parseInt(postreqPair.getRight()));
 			s.addBatch();
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
+		} catch (SQLException | NumberFormatException e) {
 			e.printStackTrace();
 		}
 
