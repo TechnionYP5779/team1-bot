@@ -70,7 +70,7 @@ public class Function {
 		String dateA[] = utils.getDateRange(queryResult, "date-period");
 
 		String query = utils.buildFilteringQuery(facultyName, lectureHours, tutorialHours, dateA);
-		StringBuilder jsonResult = new StringBuilder();
+		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 
 		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
 		c.getLogger().info("=========== lectureHours IS " + lectureHours + " ===========");
@@ -82,43 +82,18 @@ public class Function {
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
 			if (!resultSet.isBeforeFirst()) {
 				c.getLogger().info("=========== NO RESULTS ===========");
-				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+				response = utils.createWebhookResponseContent(globals.NO_COURSES_FOUND_ERROR, s);
 			} else {
 				c.getLogger().info("=========== FOUND RESULTS ===========");
-				jsonResult.append("Here's what I found:\n");
-				jsonResult = parseFilterResults(resultSet, jsonResult, c);
+				response = TableResponse.quaryTableResponse(s, "Here's what I found:", resultSet);
 			}
 
 			connection.close();
-			c.getLogger().info("=========== RETURNING RESULTS ===========");
-			return utils.createWebhookResponseContent(jsonResult.toString(), s);
-
 		} catch (Exception e) {
 			c.getLogger().info("=========== " + e.getMessage() + " ===========");
-			throw new RuntimeException();
+			response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		}
-	}
-
-	private StringBuilder parseFilterResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
-		c.getLogger().info("=========== MAKING RESULTS ===========");
-		try {
-			for (int count = 1; s.next() & count <= globals.COURSE_FILTER_LIMIT;) {
-				jsonResult.append(count + " - " + s.getString(1) + " (" + s.getString(2) + ")\n");
-				++count;
-			}
-
-			if (s.next()) // more answers to be read after reading limit
-				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
-						+ "To narrow your search please add parameters)");
-
-		} catch (SQLException e) {
-			c.getLogger().info("=========== " + e.getMessage() + " ===========");
-			throw new RuntimeException();
-		}
-
-		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() + " ===========");
-		return jsonResult;
-
+		return response;
 	}
 
 	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
@@ -198,7 +173,7 @@ public class Function {
 		Connection connection = null;
 		StringBuilder openingHours = new StringBuilder();
 		CardBuilder cb = new CardBuilder();
-		HttpResponseMessage response = null;
+		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
 			String selectSql = "SELECT Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,ImageUrl FROM Businesses"
@@ -251,7 +226,7 @@ public class Function {
 		Connection connection = null;
 		StringBuilder openingHours = new StringBuilder();
 		CardBuilder cb = new CardBuilder();
-		HttpResponseMessage response = null;
+		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
 			String selectSql = "SELECT BusinessName, " + day + ",ImageUrl FROM BUSINESSES WHERE CHARINDEX('" + bname
