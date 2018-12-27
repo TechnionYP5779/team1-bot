@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 
-public class Bag implements Iterable<String>{
+public class BagOfWords implements Iterable<String>{
 	
 	private HashMap<String, Integer> bag = new HashMap<>();
 	private int size;
@@ -29,10 +29,10 @@ public class Bag implements Iterable<String>{
 		return bag.keySet().toArray();
 	}
 
-	public boolean add(String key) {
+	public BagOfWords add(String key) {
 		++size;
 		bag.put(key, !bag.containsKey(key) ? Integer.valueOf(1) : Integer.valueOf(bag.get(key).intValue() + 1));
-		return true;
+		return this;
 	}
 
 	public boolean remove(String key) {
