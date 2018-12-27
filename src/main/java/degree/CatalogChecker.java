@@ -25,6 +25,9 @@ public class CatalogChecker {
 		
 		if(myCourses.size() > 0) {
 			c.getLogger().info("================== GOT YOUR COURSES ====================");
+		} else {
+			c.getLogger().info("================== GOT YOUR COURSES ====================");
+			throw new RuntimeException("Failed to read course from UG\n");
 		}
 	}
 	
