@@ -131,7 +131,8 @@ public class Function {
 		c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
 		String response = Indexer.indexCourses(queryToUse);
 		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
-		return utils.createWebhookResponseContent(response, s);
+		String botAnswer = "Courses that deal with " + queryToUse + " are:\n" + response;
+		return utils.createWebhookResponseContent(botAnswer, s);
 	}
 	
 	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
