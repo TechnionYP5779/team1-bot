@@ -1,6 +1,5 @@
 package FuncTest.TestFunc;
 
-import google.tasks.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,7 +13,6 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
-import google.tasks.GoogleTasksAPI;
 import help.BotFeaturesInfo;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;

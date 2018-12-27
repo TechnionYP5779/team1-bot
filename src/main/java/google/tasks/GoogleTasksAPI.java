@@ -3,9 +3,7 @@ package google.tasks;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,14 +16,13 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
 
 public class GoogleTasksAPI {
-	private static final String APPLICATION_NAME = "Google Tasks API Java Quickstart";
+	private static final String APPLICATION_NAME = "Google Tasks API Technion Bot Trial";
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String TOKENS_DIRECTORY_PATH = "tokens";
 	/**
@@ -119,9 +116,9 @@ public class GoogleTasksAPI {
 			return new LinkedList<>();
 		}
 	}
-
-	public static void main(String... args) throws IOException {
-		completeTask("last try");
-		System.out.println("Done!");
-	}
+//
+//	public static void main(String... args) throws IOException {
+//		completeTask("last try");
+//		System.out.println("Done!");
+//	}
 }
