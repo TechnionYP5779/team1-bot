@@ -296,6 +296,10 @@ public class Function {
 			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
 		
 		String ID = parameters.getString("ID"), code = parameters.getString("code");
+		
+		c.getLogger().info("================== ID = " + ID + "====================");
+		c.getLogger().info("================== code = " + code + "====================");
+		
 		LoginCredentials lc = new LoginCredentials(ID,  code);
 		CatalogChecker cc = new CatalogChecker(c, lc);
 		

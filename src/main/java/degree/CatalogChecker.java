@@ -22,6 +22,10 @@ public class CatalogChecker {
 	public CatalogChecker(ExecutionContext c, LoginCredentials creds) {
 		this.c = c;
 		myCourses = (new CourseListGetter(creds, c)).getCourseList();
+		
+		if(myCourses.size() > 0) {
+			c.getLogger().info("================== GOT YOUR COURSES ====================");
+		}
 	}
 	
 	static public double sumPoints(final List<Course> list){
@@ -51,6 +55,8 @@ public class CatalogChecker {
 			jsonResult.append("\n");
 		}
 		
+		c.getLogger().info("================== FINISHED MANDATORY COMP ====================");
+		
 		List<Course> myCore = getMyCore();
 		if (myCore.size() >= 3)
 			jsonResult.append("You've completed the core courses\n");
@@ -61,18 +67,27 @@ public class CatalogChecker {
 				jsonResult.append(corecourse.getCourseNum() + " ");
 			jsonResult.append("\n");
 		}
+		
+		c.getLogger().info("================== FINISHED CORE COMP ====================");
+		
 		if(getMyProject().isEmpty())
 			jsonResult.append("It seems that you haven't completed the requirement for a project\n");
+		
+		c.getLogger().info("================== FINISHED PROJECT COMP ====================");
 		
 		double myListAPoints = sumPoints(getMyListA());
 		if(myListAPoints < 15)
 			jsonResult.append("It seems that you haven't completed the requirement for List A, you are missing "
 					+ (15 - myListAPoints) + " points\n");
 		
+		c.getLogger().info("================== FINISHED LISTA COMP ====================");
+		
 		double myListBPoints = sumPoints(getMyListB());
 		if(myListAPoints + myListBPoints < 28.5)
 			jsonResult.append("It seems that you haven't completed the requirement for electives, you are missing "
 					+ (28.5 - myListAPoints - myListBPoints) + " points\n");
+		
+		c.getLogger().info("================== FINISHED ELECTIVES COMP ====================");
 		
 		
 		return jsonResult.toString();
