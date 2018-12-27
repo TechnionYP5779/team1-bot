@@ -1,15 +1,16 @@
 package indexer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import FuncTest.TestFunc.globals;
 
 public class CourseSimularitySearcher {
 	private final double λ = 0.2;
@@ -18,7 +19,7 @@ public class CourseSimularitySearcher {
 	private HashMap<Integer, BagOfWords> coursesSyllabi = new HashMap<>();
 	private BagOfWords corpus = new BagOfWords();
 
-	private void initStopwords(){
+	private void initStopwords() {
 		this.stopwords.addAll(Arrays.asList("a", "about", "above", "according", "across", "after", "afterwards",
 				"again", "against", "albeit", "all", "almost", "alone", "along", "already", "also", "although",
 				"always", "among", "amongst", "am", "an", "and", "another", "any", "anybody", "anyhow", "anyone",
@@ -62,28 +63,37 @@ public class CourseSimularitySearcher {
 				"yourselves"));
 	}
 
-	public CourseSimularitySearcher initCourses(String descPath, String swPath) {
-		try {
-			if (swPath != null)
-				initStopwords();
-			try (BufferedReader br = new BufferedReader(new FileReader(new File(descPath)))) {
-				String line;
-				Integer courseNumber = Integer.valueOf(-1);
-				while ((line = br.readLine()) != null)
-					if (!line.startsWith("<DOCNO>")) {
-						if (!line.startsWith("<"))
-							parseLine(courseNumber, line);
-					} else {
-						courseNumber = Integer.valueOf(Integer.parseInt(line.substring(8, line.length() - 9)));
-						this.coursesSyllabi.put(courseNumber, new BagOfWords());
-					}
+	public CourseSimularitySearcher initCourses() {
+		initStopwords();
+
+		String query = "SELECT * FROM DBO.COURSEDESCRIPTION";
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (!resultSet.isBeforeFirst())
+				throw new AssertionError("The Description Table Is Empty!");
+
+			while (resultSet.next()) {
+				Integer courseNumber = Integer.valueOf(resultSet.getInt(1));
+				this.coursesSyllabi.put(courseNumber, new BagOfWords());
+				parseLine(courseNumber, resultSet.getString(2));
 			}
-			return this;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
+		} catch (Exception e) {
+			throw new RuntimeException("DB Error");
 		}
+
+//			try (BufferedReader br = new BufferedReader(new FileReader(new File(descPath)))) {
+//				String line;
+//				Integer courseNumber = Integer.valueOf(-1);
+//				while ((line = br.readLine()) != null)
+//					if (!line.startsWith("<DOCNO>")) {
+//						if (!line.startsWith("<"))
+//							parseLine(courseNumber, line);
+//					} else {
+//						courseNumber = Integer.valueOf(Integer.parseInt(line.substring(8, line.length() - 9)));
+//						this.coursesSyllabi.put(courseNumber, new BagOfWords());
+//					}
+//			}
+		return this;
 	}
 
 	private void parseLine(Integer courseNumber, String line) {
@@ -119,9 +129,10 @@ public class CourseSimularitySearcher {
 		return this.coursesSyllabi.keySet().stream().filter(n -> !n.equals(courseNumber))
 				.map(n -> new AbstractMap.SimpleEntry<Integer, Double>(n,
 						Double.valueOf(singlePairLikelihood(this.coursesSyllabi.get(courseNumber), n))))
-				.sorted((x,y) -> y.getValue().compareTo(x.getValue())).limit(limit).map(p -> p.getKey()).collect(Collectors.toList());
+				.sorted((x, y) -> y.getValue().compareTo(x.getValue())).limit(limit).map(p -> p.getKey())
+				.collect(Collectors.toList());
 	}
-	
+
 	private static String formatList(List<Integer> l) {
 		if (l.isEmpty())
 			return "\n";
@@ -131,16 +142,12 @@ public class CourseSimularitySearcher {
 		String result = stringBuilder.toString();
 		return result.substring(0, result.length() - 1) + "\n";
 	}
-	
+
 	public static String searchSimilarCourses(Integer courseNumber, int limit) {
-		String baseDir = "src/main/java/indexer/";
-		return formatList(new CourseSimularitySearcher().initCourses(baseDir + "Descriptions.txt", baseDir + "stopwords.txt")
-				.courseLikelihood(Integer.valueOf(236370), 3));
+		return formatList(new CourseSimularitySearcher().initCourses().courseLikelihood(courseNumber, limit));
 	}
 
-//	public static void main(String[] args) {
-//		String baseDir = "src/main/java/indexer/";
-//		System.out.println(formatList(new CourseSimularitySearcher().initCourses(baseDir + "Descriptions.txt", baseDir + "stopwords.txt")
-//				.courseLikelihood(Integer.valueOf(236370), 3)));
-//	}
+	public static void main(String[] args) {
+		System.out.println(searchSimilarCourses(Integer.valueOf(234123), 3));
+	}
 }
