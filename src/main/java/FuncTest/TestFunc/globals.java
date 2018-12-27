@@ -21,6 +21,7 @@ public class globals {
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
 	public static final String MISSING_DAY_PARAM = "Please specify a day\n";
 	public static final String GENERIC_ERR_MSG = "I'm sorry, something wen\'t wrong";
+	public static final String SERVER_ERROR = "Server error, please try again at a later date";
 	//globals for course filter
 	public static final String NO_COURSES_FOUND_ERROR = "I'm Sorry, I couldn't find any courses matching your request";
 	//globals for degreeHelper
@@ -35,8 +36,8 @@ public class globals {
 					+ "hostNameInCertificate=*.database.windows.net;loginTimeout=30;",
 			"technobotserver.database.windows.net", "technobot", "techazure2@technobotserver", "TechnionBot1234");
 
-	public static final Object NO_VIDEO_FOUND_ERROR = "No videos where found. It could be that the course-number does represent an actual course"
-			+ ", or perhaps no video was recorded";
+	public static final Object NO_VIDEO_FOUND_ERROR = "No videos were found. It could be that the course-number does not correspond to an actual course"
+			+ ", or perhaps no video was recorded for it\n";
 	public static final int COURSE_FILTER_LIMIT = 15;
 
 }
