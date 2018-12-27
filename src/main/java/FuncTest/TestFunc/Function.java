@@ -7,6 +7,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
 
@@ -172,7 +174,6 @@ public class Function {
 		bname = parameters.getString("Business");
 		Connection connection = null;
 		StringBuilder openingHours = new StringBuilder();
-		CardBuilder cb = new CardBuilder();
 		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
@@ -187,18 +188,16 @@ public class Function {
 					ResultSetMetaData rsmd = resultSet.getMetaData();
 					resultSet.next();
 					int columnsNumber = rsmd.getColumnCount();
+					String[] days = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday".split(",");
+					Map<String, String> businessHours = new HashMap<>();
 					for (int i = 1; i < columnsNumber; ++i) {
 						String columnValue = resultSet.getString(i);
 						if (!"N\\A".equals(columnValue)) {
 							if (i > 1)
-								openingHours.append("\n");
-							openingHours.append("Between " + columnValue + " on " + rsmd.getColumnName(i) + "s");
+								businessHours.put(days[i-1], columnValue);
 						}
 					}
-					cb.setTitle(bname);
-					cb.setText(openingHours.toString());
-					cb.setImgUrl(resultSet.getString(resultSet.findColumn("ImageUrl")));
-					response = CardResponse.generate(s, "Info on " + bname + " is shown", cb.build());
+					response = TableResponse.businessHoursTableResponse(s, bname, businessHours);
 				}
 				connection.close();
 			}
