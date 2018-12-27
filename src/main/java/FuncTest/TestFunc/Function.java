@@ -14,6 +14,7 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import degree.CatalogChecker;
 import courses.videos.VideoAnswers;
 import help.BotFeaturesInfo;
 import homework.HomeworkGetter;
@@ -57,6 +58,8 @@ public class Function {
 			return VideoAnswers.checkExists(queryResult, s, c);
 		case globals.HELP_INTENT_NAME:
 			return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
+		case globals.FINISH_DEGREE_INTENT_NAME:
+			return calculateDegreeProgress(queryResult, s, c);
 		}
 
 		return utils.createWebhookResponseContent("what is this intent?", s);
@@ -271,6 +274,30 @@ public class Function {
 			return TableResponse.homeworkTableResponse(s, homework.getUpcomingHomework());
 		} catch (WrongCredentialsException e) {
 			return utils.createWebhookResponseContent("Wrong credentials, please try again", s);
+		}
+	}
+
+	private HttpResponseMessage calculateDegreeProgress(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		c.getLogger().info("=========== FINISH DEGREE INTENT ===========");
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+
+		if (!utils.allParametersArePresent(parameters, Arrays.asList("ID", "code")))
+			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
+
+		String ID = parameters.getString("ID"), code = parameters.getString("code");
+
+		c.getLogger().info("================== ID = " + ID + "====================");
+		c.getLogger().info("================== code = " + code + "====================");
+
+		LoginCredentials lc = new LoginCredentials(ID, code);
+		CatalogChecker cc = new CatalogChecker(c, lc);
+
+		try {
+			return utils.createWebhookResponseContent(cc.degreeCompletionCompute(), s);
+		} catch (SQLException e) {
+			c.getLogger().info("==================" + e.getMessage() + "====================");
+			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
 		}
 	}
 
