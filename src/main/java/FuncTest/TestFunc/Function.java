@@ -13,6 +13,7 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import help.BotFeaturesInfo;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
@@ -35,25 +36,34 @@ public class Function {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
-			case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
-				return getHourByDay(queryResult, s, c);
-			case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
-				return getHourByWeek(queryResult, s, c);
-			case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
-				return getUpcomingHomework(queryResult, s, c);
 			case globals.LOGIN_INTENT:
 				return checkLoginName(queryResult, s, c);
 			case globals.SUBSCRIBE_INTENT:
 				return subscribeToSystem(queryResult,s,c);
-			case globals.FILTER_COURSES_INTENT_NAME:
-				return getMatchingCoursesResponse(queryResult, s, c);
 			case globals.RUN_RULES_INTENT:
 				return applyRules(queryResult, s, c);
+      case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
+        return getHourByDay(queryResult, s, c);
+      case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
+        return getHourByWeek(queryResult, s, c);
+      case globals.FILTER_COURSES_INTENT_NAME:
+        return getMatchingCoursesResponse(queryResult, s, c);
+      case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
+        return getUpcomingHomework(queryResult, s, c);
+      case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
+			  return getCoursesPrerequisitesByName(queryResult, s, c);
+		  case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
+			  return getCoursesPrerequisitesByNumber(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
-         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+        return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+      case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
+			  return VideoAnswers.checkExists(queryResult, s, c);
+      case globals.HELP_INTENT_NAME:
+          return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
 		}
+		
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
 	
@@ -133,16 +143,16 @@ public class Function {
 		}
 	}
 
-	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
+	private StringBuilder parseFilterResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
 		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
-			for (int count = 1; resultSet.next() & count <= globals.COURSE_FILTER_LIMIT;) {
-				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
-			resultSet.getString(2) + ")\n");
+			for (int count = 1; s.next() & count <= globals.COURSE_FILTER_LIMIT;) {
+				jsonResult.append(count + " - " + s.getString(1) + " (" +
+			s.getString(2) + ")\n");
 				++count;
 			}
 			
-			if(resultSet.next()) //more answers to be read after reading limit
+			if(s.next()) //more answers to be read after reading limit
 				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
 						+ "To narrow your search please add parameters)");
 			
@@ -155,6 +165,72 @@ public class Function {
 		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
 		return jsonResult;
 
+	}
+	
+	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
+		String courseName = utils.getUserParam(queryResult, "courseName"),
+				query = utils.buildPrerequisitesQueryByName(courseName);
+		c.getLogger().info("=========== COURSE NAME IS " + courseName + " ===========");
+		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder jsonResult = new StringBuilder();
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (resultSet.isBeforeFirst())
+				parsePrerequisitesResults(resultSet, jsonResult, c);
+			else
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			connection.close();
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	private HttpResponseMessage getCoursesPrerequisitesByNumber(JSONObject queryResult,
+			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
+		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
+		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
+		c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
+		String query = utils.buildPrerequisitesQueryByNumber(courseNumber);
+		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder jsonResult = new StringBuilder();
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (resultSet.isBeforeFirst())
+				parsePrerequisitesResults(resultSet, jsonResult, c);
+			else
+				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+			connection.close();
+			return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	private void parsePrerequisitesResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
+		try {
+			s.next();
+			String pre = s.getString(1);
+			c.getLogger().info(pre);
+			int count = 1;
+			String allOptions[] = pre.split("(\\|)");
+			for(String opt : allOptions) {
+				String anOption[] = opt.split("(&)");
+				jsonResult.append(count + ") ");
+				for(String course : anOption)
+					jsonResult.append(course + " AND ");
+				jsonResult.delete(jsonResult.length() - 5, jsonResult.length() - 1);
+				jsonResult.append("\nOR\n");
+				++count;
+			}
+			jsonResult.delete(jsonResult.length() - 4, jsonResult.length() - 1);
+			c.getLogger().info(jsonResult.toString());
+			assert !s.next();
+		} catch (SQLException e) {
+			throw new RuntimeException();
+		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,

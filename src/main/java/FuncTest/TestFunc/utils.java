@@ -64,6 +64,15 @@ public class utils {
 				.header("Content-Type", "application/json; charset=UTF-8").header("Accept", "application/json").build();
 	}
 
+  
+	protected static String buildPrerequisitesQueryByName(String courseName) {
+		return "select prereq from dbo.Courses" + (courseName == null ? "" : " where name = " + quote(courseName));
+	}
+	
+	protected static String buildPrerequisitesQueryByNumber(Integer courseNumber) {
+		return "select prereq from dbo.Courses" + (courseNumber == null ? "" : " where id = " + courseNumber);
+	}
+  
 	//returns null is the parameter is missing
 	protected static String getUserParam(JSONObject queryResult, String paramName) {
 		JSONObject parameters = queryResult.getJSONObject("parameters");
@@ -110,7 +119,7 @@ public class utils {
 	public static Integer getIntUserParamFromContext(JSONObject queryResult, String paramName) {
 		JSONArray outputContexts = queryResult.getJSONArray("outputContexts");
 		JSONObject parameters = outputContexts.getJSONObject(0).getJSONObject("parameters");
-		return !parameters.has(paramName) ? null : parameters.getInt(paramName);
+		return !parameters.has(paramName) ? null : Integer.valueOf(parameters.getInt(paramName));
 	}
 	
 	//paramName is probably date-period
@@ -127,6 +136,4 @@ public class utils {
 				to.substring(0, to.indexOf("T"))};
 		
 	}
-		
-	
 }
