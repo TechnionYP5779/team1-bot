@@ -7,15 +7,24 @@ public class CardBuilder {
 	private String text;
 	private String imgUrl;
 
+	private String button_url;
+	private String button_title;
+
 	public CardBuilder() {
 		this.title = ""; // Mandatory
 		this.subtitle = null;
 		this.text = "";// Mandatory
 		this.imgUrl = null;
+		this.button_title = "Click to view";
+		this.button_url =null;
 	}
 
 	public Card build() {
-		return new Card(title, subtitle, text, imgUrl);
+		if (button_url.equals("")) {
+			return new Card(title, subtitle, text, imgUrl);
+		}else {
+			return new Card(title, subtitle, text, imgUrl,button_title,button_url);
+		}
 	}
 
 	public void setTitle(String title) {
@@ -32,6 +41,22 @@ public class CardBuilder {
 
 	public void setImgUrl(String imgUrl) {
 		this.imgUrl = imgUrl;
+	}
+
+	public String getButton_url() {
+		return button_url;
+	}
+
+	public void setButton_url(String button_url) {
+		this.button_url = button_url;
+	}
+
+	public String getButton_title() {
+		return button_title;
+	}
+
+	public void setButton_title(String button_title) {
+		this.button_title = button_title;
 	}
 
 }

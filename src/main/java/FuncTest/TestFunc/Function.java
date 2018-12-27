@@ -15,6 +15,7 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import courses.videos.VideoAnswers;
 import help.BotFeaturesInfo;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
