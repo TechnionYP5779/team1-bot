@@ -12,8 +12,7 @@ public class Course {
 	public Course(int courseNum, double points) {
 		this.courseNum = courseNum;
 		this.points = points;
-		this.isListA = false;
-		this.isListB = false;
+		this.isListB = this.isListA = false;
 		this.isProject = false;
 		this.isRequired = false;
 	}

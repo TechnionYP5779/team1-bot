@@ -24,8 +24,9 @@ public class CatalogChecker {
 		myCourses = (new CourseListGetter(creds, c)).getCourseList();
 	}
 	
-	public double sumPoints(final List<Course> list){
-		return list.stream().map(c -> c.getPoints()).reduce(0.0, (x,y) -> x+y);
+	static public double sumPoints(final List<Course> list){
+		return list.stream().map(c -> Double.valueOf(c.getPoints()))
+				.reduce(Double.valueOf(0.0), (x,y) -> Double.valueOf(x.doubleValue()+y.doubleValue())).doubleValue();
 	}
 	
 	public List<Course> getMissingMandatory() throws SQLException{
@@ -77,7 +78,7 @@ public class CatalogChecker {
 		return jsonResult.toString();
 	}
 		
-	private List<Course> getListA() throws SQLException{
+	static private List<Course> getListA() throws SQLException{
 		List<Course> listA = new ArrayList<Course>();
 		String query_getListA = "select * from dbo.CourseRoles where CourseRole = 'listA'";
 		StringBuilder jsonResult = new StringBuilder();
@@ -104,7 +105,7 @@ public class CatalogChecker {
 		return intersection(getListA(), myCourses);
 	}
 
-	private List<Course> getListB() throws SQLException{
+	static private List<Course> getListB() throws SQLException{
 		List<Course> listB = new ArrayList<Course>();
 		String query_getListB = "select * from dbo.CourseRoles where CourseRole = 'listB'";
 		StringBuilder jsonResult = new StringBuilder();
@@ -131,7 +132,7 @@ public class CatalogChecker {
 		return intersection(getListB(), myCourses);
 	}
 
-	private List<Course> getProject() throws SQLException {
+	static private List<Course> getProject() throws SQLException {
 		List<Course> project = new ArrayList<Course>();
 		String query_getProject = "select * from dbo.CourseRoles where CourseRole = 'project'";
 		StringBuilder jsonResult = new StringBuilder();
@@ -158,7 +159,7 @@ public class CatalogChecker {
 		return intersection(getProject(), myCourses);
 	}
 	
-	private List<Course> getMandatory() throws SQLException {
+	static private List<Course> getMandatory() throws SQLException {
 		List<Course> mandatory = new ArrayList<Course>();
 		String query_getProject = "select * from dbo.CourseRoles where CourseRole = 'mandatory'";
 		StringBuilder jsonResult = new StringBuilder();
@@ -181,7 +182,7 @@ public class CatalogChecker {
 		return mandatory;
 	}
 	
-	private List<Course> getCore() throws SQLException{
+	static private List<Course> getCore() throws SQLException{
 		List<Course> core = new ArrayList<Course>();
 		String query_getCore = "select * from dbo.CourseRoles where CourseRole = 'core'";
 		StringBuilder jsonResult = new StringBuilder();
@@ -209,7 +210,7 @@ public class CatalogChecker {
 	}
 	
 	//A - B
-	private List<Course> difference(List<Course> A, List<Course> B) {
+	static private List<Course> difference(List<Course> A, List<Course> B) {
 		if(A == null || B == null)
 			return null;
 	    List<Course> rtnList = new ArrayList<>();
@@ -219,7 +220,7 @@ public class CatalogChecker {
 	    return rtnList;
 	}
 	
-	private List<Course> intersection(List<Course> A, List<Course> B) {
+	static private List<Course> intersection(List<Course> A, List<Course> B) {
 		if(A == null || B == null)
 			return null;
 	    List<Course> rtnList = new ArrayList<>();

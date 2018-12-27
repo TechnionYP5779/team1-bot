@@ -77,21 +77,21 @@ public class CourseListGetter {
 		}
 	}
 	
-	private boolean checkCourseAlreadyExist(Course toCheck, List<Course> courseList) {
+	static private boolean checkCourseAlreadyExist(Course toCheck, List<Course> courseList) {
 		for(Course course : courseList)
 			if (course.getCourseNum() == toCheck.getCourseNum())
 				return true;
 		return false;
 	}
 	
-	private List<Course> extractCourseListFromTables(List<HtmlTable> semesterTables){
+	static private List<Course> extractCourseListFromTables(List<HtmlTable> semesterTables){
 		List<Course> courseList = new ArrayList<>();
 		for(HtmlTable table : semesterTables)
 			courseList.addAll(extractCourseListFromTable(table));
 		return courseList;
 	}
 	
-	private List<Course> extractCourseListFromTable(HtmlTable semesterTable){
+	static private List<Course> extractCourseListFromTable(HtmlTable semesterTable){
 		List<Course> courseList = new ArrayList<>();
 		List<HtmlTableRow> courseTableRows = semesterTable.getRows();
 		for(HtmlTableRow courseRow : courseTableRows) {
@@ -102,7 +102,7 @@ public class CourseListGetter {
 		return courseList;	
 	}
 	
-	private Course extractCourseFromRow(HtmlTableRow courseRow) {
+	private static Course extractCourseFromRow(HtmlTableRow courseRow) {
 		if (courseRow.getCells().size() != 3)
 			return null;
 		String courseGrade = courseRow.getCell(0).asText();
@@ -110,15 +110,15 @@ public class CourseListGetter {
 			return null;
 		String courseName = courseRow.getCell(2).asText(),
 				courseNumber = extractCourseNumber(courseName);
-		return "".equals(courseNumber) ? null : new Course(Integer.valueOf(courseNumber), Double.valueOf(courseRow.getCell(1).asText()));
+		return "".equals(courseNumber) ? null : new Course(Integer.valueOf(courseNumber).intValue(), Double.valueOf(courseRow.getCell(1).asText()).doubleValue());
 	}
 	
-	private String extractCourseNumber(final String s) {
+	private static String extractCourseNumber(final String s) {
 		Matcher m = Pattern.compile("(\\d{6})").matcher(s);
 		return !m.find() ? "" : m.group(0);
 	}
 		
-	private String getRedirectURL(String url) throws IOException {
+	private static String getRedirectURL(String url) throws IOException {
 		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 		con.setRequestMethod("GET");
 		con.setRequestProperty("User-Agent", USER_AGENT);
