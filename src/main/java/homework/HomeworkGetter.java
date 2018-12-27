@@ -48,8 +48,8 @@ public class HomeworkGetter {
 			final HtmlPage page2 = button.click();
 			if (page2.getUrl() == page.getUrl())
 				throw new WrongCredentialsException();
-			final HtmlTable $ = (HtmlTable) ((HtmlTable) page2.getAnchorByText("Homeworks").click()).getByXPath("//table[@class='stud-hw-table']").get(0);
-			$.asText();
+			HtmlPage page3 = page2.getAnchorByText("Homeworks").click();
+			final HtmlTable $ = (HtmlTable) page3.getByXPath("//table[@class='stud-hw-table']").get(0);
 			return ExtractHomeworkFromTable($);
 		}
 	}
