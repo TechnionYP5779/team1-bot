@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
@@ -14,11 +12,8 @@ import com.microsoft.azure.functions.HttpStatus;
 public class BrowsingCarouselResponse {
 
 	public static HttpResponseMessage generate(HttpRequestMessage<Optional<String>> s, String textResponse,
-			List<BrowsingCarouselItem> items, ExecutionContext c) {
-		JSONArray itemsJSON = itemsToJSONArray(items, c);
-
-		c.getLogger().info(
-				"=========== DONE WITH itemsJSON  genration. itemsJSON  size:" + itemsJSON.length() + " ===========");
+			List<BrowsingCarouselItem> items) {
+		JSONArray itemsJSON = itemsToJSONArray(items );
 
 		return s.createResponseBuilder(HttpStatus.OK)
 				.body(new JSONObject().put("payload", new JSONObject().put("google", new JSONObject()
@@ -33,7 +28,7 @@ public class BrowsingCarouselResponse {
 
 	}
 
-	private static JSONArray itemsToJSONArray(List<BrowsingCarouselItem> items, ExecutionContext cc) {
+	private static JSONArray itemsToJSONArray(List<BrowsingCarouselItem> items) {
 		JSONArray res = new JSONArray();
 		for (BrowsingCarouselItem c : items) {
 

@@ -39,7 +39,7 @@ public class VideoAnswers {
 		
 		StringBuilder jsonResult = new StringBuilder();
 		
-		c.getLogger().info("=========== " + query_checkVideo + " ===========");
+//		c.getLogger().info("=========== " + query_checkVideo + " ===========");
 		List<VideoObject> results = new ArrayList<>();
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			PreparedStatement stmt = connection.prepareStatement(query_checkVideo);
@@ -47,19 +47,17 @@ public class VideoAnswers {
 			
 			ResultSet resultSet = stmt.executeQuery();
 			if (!resultSet.isBeforeFirst()) {
-				c.getLogger().info("=========== NO RESULTS ===========");
+//				c.getLogger().info("=========== NO RESULTS ===========");
 				jsonResult.append(globals.NO_VIDEO_FOUND_ERROR);
 				return utils.createWebhookResponseContent(jsonResult.toString(), s);
 			} else {
-				c.getLogger().info("=========== FOUND RESULTS ===========");
+//				c.getLogger().info("=========== FOUND RESULTS ===========");
 //				jsonResult.append("Here's what I found:\n");
 				results = parseVideoResults(resultSet, c);
 			}
 
 			connection.close();
-			c.getLogger().info("=========== RETURNING RESULTS ===========");
-//			
-			return createAppropriateResponse(s,results,c);
+			return createAppropriateResponse(s,results);
 
 //
 
@@ -71,8 +69,7 @@ public class VideoAnswers {
 		}
 	}
 
-	private static HttpResponseMessage createAppropriateResponse(HttpRequestMessage<Optional<String>> s, List<VideoObject> results, ExecutionContext c ) {
-		c.getLogger().info("=========== Results size:" + results.size()+ " ===========");
+	private static HttpResponseMessage createAppropriateResponse(HttpRequestMessage<Optional<String>> s, List<VideoObject> results ) {
 
 		if (results.size() == 1) {
 			VideoObject v = results.get(0);
@@ -97,9 +94,8 @@ public class VideoAnswers {
 				cb.setTitle("Video results for "+v.courseNum);
 				items.add(cb.generate());
 			}
-			c.getLogger().info("=========== DONE WITH ITEMS genration. ITEMS size:" + items.size()+ " ===========");
 
-			return BrowsingCarouselResponse.generate(s,"Hooray! I found some video results", items,c );
+			return BrowsingCarouselResponse.generate(s,"Hooray! I found some video results", items );
 		}
 	}
 
