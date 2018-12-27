@@ -17,6 +17,10 @@ public class Course {
 		this.isRequired = false;
 	}
 	
+	public Course(int courseNum) {
+		this.courseNum = courseNum;
+	}
+	
 	public void setIsListA(boolean flag) {
 		this.isListA = flag;
 	}

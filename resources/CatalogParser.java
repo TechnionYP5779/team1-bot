@@ -68,10 +68,8 @@ public class CatalogParser {
 	}
 	
 	public static String convertPDFToTxt(String filePath) {
-		try {
-			PDDocument pdDoc = PDDocument.load(readFileAsBytes(filePath));
+		try(PDDocument pdDoc = PDDocument.load(readFileAsBytes(filePath))) {
 			String pageText = new PDFTextStripper().getText(pdDoc);
-			pdDoc.close();
 			return pageText;
 		} catch (IOException e) {
 			e.printStackTrace();

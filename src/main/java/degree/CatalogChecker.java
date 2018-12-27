@@ -38,10 +38,10 @@ public class CatalogChecker {
 	
 	public List<Course> getMissingMandatory() throws SQLException{
 		List<Course> mandatory = getMandatory(), diff = difference(mandatory, myCourses);
-		if(myCourses.contains(new Course(234145, -1)))
-			diff.remove(new Course(44145, -1));
-		if(myCourses.contains(new Course(44145, -1)))
-			diff.remove(new Course(234145, -1));
+		if(myCourses.contains(new Course(234145)))
+			diff.remove(new Course(44145));
+		if(myCourses.contains(new Course(44145)))
+			diff.remove(new Course(234145));
 		return diff;
 	}
 	
@@ -145,7 +145,7 @@ public class CatalogChecker {
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
-					listA.add(new Course(courseNumber, -1));
+					listA.add(new Course(courseNumber));
 				}
 
 			connection.close();
@@ -172,7 +172,7 @@ public class CatalogChecker {
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
-					listB.add(new Course(courseNumber, -1));
+					listB.add(new Course(courseNumber));
 				}
 
 			connection.close();
@@ -199,7 +199,7 @@ public class CatalogChecker {
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
-					project.add(new Course(courseNumber, -1));
+					project.add(new Course(courseNumber));
 				}
 
 			connection.close();
@@ -226,7 +226,7 @@ public class CatalogChecker {
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
-					mandatory.add(new Course(courseNumber, -1));
+					mandatory.add(new Course(courseNumber));
 				}
 
 			connection.close();
@@ -249,7 +249,7 @@ public class CatalogChecker {
 			else
 				while (resultSet.next()) {
 					int courseNumber = resultSet.getInt(1);
-					core.add(new Course(courseNumber, -1));
+					core.add(new Course(courseNumber));
 				}
 
 			connection.close();

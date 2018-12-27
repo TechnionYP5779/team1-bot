@@ -20,7 +20,7 @@ public class globals {
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
 	public static final String MISSING_DAY_PARAM = "Please specify a day\n";
-	public static final String GENERIC_ERR_MSG = "I'm sorry, something wen\'t wrong";
+	public static final String GENERIC_ERR_MSG = "I'm sorry, something went wrong";
 	public static final String SERVER_ERROR = "Server error, please try again at a later date";
 	//globals for course filter
 	public static final String NO_COURSES_FOUND_ERROR = "I'm Sorry, I couldn't find any courses matching your request";
