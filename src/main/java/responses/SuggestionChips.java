@@ -17,6 +17,7 @@ public class SuggestionChips {
 	public static HttpResponseMessage filterSuggestionChips(HttpRequestMessage<Optional<String>> s, String[] suggestions, int numSuggestions,String displayText) {
 		boolean needMore = ( numSuggestions > maxChipsNum ) ? true : false;
 		int possibleChipsHint = ( numSuggestions > maxChipsNum ) ? maxChipsNum : numSuggestions; 
+		possibleChipsHint -= needMore ? 1 : 0;
 		moreSuggestions = new ArrayList<>();
 		JSONArray suggestionsArray = new JSONArray();
 		for(int i=0; i < possibleChipsHint; i++) {
@@ -34,7 +35,7 @@ public class SuggestionChips {
 		}
 		
 		if(needMore) {
-			suggestionsArray.put(new JSONObject().put("title", "allOptions"));
+			suggestionsArray.put(new JSONObject().put("title", "All"));
 		}
 		
 		JSONArray items = new JSONArray()
