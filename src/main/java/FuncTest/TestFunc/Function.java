@@ -193,7 +193,7 @@ public class Function {
 					for (int i = 1; i < columnsNumber; ++i) {
 						String columnValue = resultSet.getString(i);
 						if (!"N\\A".equals(columnValue)) {
-								businessHours.put(days[i - 1], columnValue);
+							businessHours.put(days[i - 1], columnValue);
 						}
 					}
 					response = TableResponse.businessHoursTableResponse(s, bname, businessHours,
