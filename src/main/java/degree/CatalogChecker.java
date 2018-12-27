@@ -44,51 +44,86 @@ public class CatalogChecker {
 	
 	public String degreeCompletionCompute() throws SQLException {
 		StringBuilder jsonResult = new StringBuilder();
+		boolean finished = true;
 		
 		List<Course> missingMandatory = getMissingMandatory();
+		jsonResult.append("Category - Mandatory Classes:\n");
 		if (missingMandatory.isEmpty())
 			jsonResult.append("You've completed the mandatory courses\n");
 		else {
 			jsonResult.append("It seems that you haven't completed the following mandatory courses:\n");
 			for (Course course : missingMandatory)
 				jsonResult.append(course.getCourseNum() + " ");
-			jsonResult.append("\n");
+			jsonResult.append("\n\n");
+			finished = false;
 		}
 		
 		c.getLogger().info("================== FINISHED MANDATORY COMP ====================");
 		
 		List<Course> myCore = getMyCore();
+		jsonResult.append("Category - Software Eng. Core Classes:\n");
 		if (myCore.size() >= 3)
-			jsonResult.append("You've completed the core courses\n");
+			jsonResult.append("You've met the requirements of core courses.\n\n");
 		else {
-			jsonResult.append("It seems that you haven't completed the requirement for core courses\n");
-			jsonResult.append("You possess the following core classes:\n");
-			for (Course corecourse : myCore)
-				jsonResult.append(corecourse.getCourseNum() + " ");
-			jsonResult.append("\n");
+			jsonResult.append("It seems that you haven't completed the requirement of 3 core courses.\n");
+			
+			if(myCore.size() == 0) {
+				jsonResult.append("You have not completed any core classes.");
+			}
+			else {
+				jsonResult.append("You possess the following core classes:\n");
+				for (Course corecourse : myCore)
+					jsonResult.append(corecourse.getCourseNum() + " ");
+			}
+			
+			jsonResult.append("\n\n");
+			finished = false;
 		}
 		
 		c.getLogger().info("================== FINISHED CORE COMP ====================");
 		
-		if(getMyProject().isEmpty())
-			jsonResult.append("It seems that you haven't completed the requirement for a project\n");
+		jsonResult.append("Category - Faculty Project Condition:\n");
+		if(getMyProject().isEmpty()) {
+			finished = false;
+			jsonResult.append("It seems that you haven't completed the requirement for a faculty project.\n\n");
+		}
+		else {
+			jsonResult.append("You've met the obligation for a faculty project.\n\n");
+		}
 		
 		c.getLogger().info("================== FINISHED PROJECT COMP ====================");
 		
+		jsonResult.append("Category - Faculty Electives:\n");
 		double myListAPoints = sumPoints(getMyListA());
-		if(myListAPoints < 15)
-			jsonResult.append("It seems that you haven't completed the requirement for List A, you are missing "
-					+ (15 - myListAPoints) + " points\n");
+		if(myListAPoints < 15) {
+			jsonResult.append("It seems that you haven't completed the requirement for List A classes. You are missing "
+					+ (15 - myListAPoints) + " points to reach 15 points.\n\n");
+			finished = false;
+		}
+		else {
+			jsonResult.append("You've met the obligation for 15 points of faculty electives.\n\n");
+		}
 		
 		c.getLogger().info("================== FINISHED LISTA COMP ====================");
 		
+		jsonResult.append("Category - Elective Classes:\n");
 		double myListBPoints = sumPoints(getMyListB());
-		if(myListAPoints + myListBPoints < 28.5)
-			jsonResult.append("It seems that you haven't completed the requirement for electives, you are missing "
-					+ (28.5 - myListAPoints - myListBPoints) + " points\n");
+		if(myListAPoints + myListBPoints < 28.5) {
+			jsonResult.append("It seems that you haven't completed the requirement for electives. You are missing "
+					+ (28.5 - myListAPoints - myListBPoints) + " points to reach 28.5 points of electives\n");
+			finished = false;
+		}
+		else {
+			jsonResult.append("You've met the obligation for 28.5 points of electives\n\n");
+		}
 		
 		c.getLogger().info("================== FINISHED ELECTIVES COMP ====================");
 		
+		jsonResult.append("Ruling:\n");
+		if(finished)
+		jsonResult.append("Congratulations! You've qualified for a diploma\n");
+		else
+			jsonResult.append("Unfortunately, you do not meet the requirement quite yet. Best of luck!\n");
 		
 		return jsonResult.toString();
 	}
