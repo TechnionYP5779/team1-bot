@@ -184,7 +184,7 @@ public class Function {
 				if (!resultSet.isBeforeFirst())
 					response = utils.createWebhookResponseContent(globals.NO_BUSINESS_FOUND_ERROR, s);
 				else {
-					openingHours.append("The opening hours of " + bname + " are:\n");
+					openingHours.append("The business hours of " + bname + " are:\n");
 					ResultSetMetaData rsmd = resultSet.getMetaData();
 					resultSet.next();
 					int columnsNumber = rsmd.getColumnCount();
@@ -194,10 +194,11 @@ public class Function {
 						String columnValue = resultSet.getString(i);
 						if (!"N\\A".equals(columnValue)) {
 							if (i > 1)
-								businessHours.put(days[i-1], columnValue);
+								businessHours.put(days[i - 1], columnValue);
 						}
 					}
-					response = TableResponse.businessHoursTableResponse(s, bname, businessHours);
+					response = TableResponse.businessHoursTableResponse(s, bname, businessHours,
+							resultSet.getString(resultSet.findColumn("ImageUrl")));
 				}
 				connection.close();
 			}

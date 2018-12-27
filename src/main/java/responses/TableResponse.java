@@ -17,7 +17,7 @@ import homework.Homework;
 public class TableResponse {
 
 	public static HttpResponseMessage businessHoursTableResponse(HttpRequestMessage<Optional<String>> s,
-			String businessName, Map<String, String> businessHours) {
+			String businessName, Map<String, String> businessHours, String imgUrl) {
 		// create table rows based on input
 		JSONArray rowsArray = new JSONArray();
 		businessHours.forEach((day, hours) -> {
@@ -34,13 +34,16 @@ public class TableResponse {
 								new JSONObject().put("google", new JSONObject().put("expectUserResponse", Boolean.TRUE)
 										.put("richResponse", new JSONObject().put("items", new JSONArray()
 												.put(new JSONObject().put("simpleResponse",
-														new JSONObject().put(
-																"textToSpeech",
+														new JSONObject().put("textToSpeech",
 																"The business hours for " + businessName
 																		+ " are shown")))
 												.put(new JSONObject().put("tableCard",
-														new JSONObject().put("rows", rowsArray).put("columnProperties",
-																new JSONArray()
+														new JSONObject()
+																.put("title", businessName + "'s Business hours")
+																.put("image", new JSONObject().put("url", imgUrl).put(
+																		"accessibilityText", "Image alternate text"))
+																.put("rows", rowsArray)
+																.put("columnProperties", new JSONArray()
 																		.put(new JSONObject().put("header", "Day"))
 																		.put(new JSONObject().put("header",
 																				"Business Hours")))))))
