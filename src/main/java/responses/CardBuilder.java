@@ -20,7 +20,7 @@ public class CardBuilder {
 	}
 
 	public Card build() {
-		if (button_url.equals("")) {
+		if (button_url == null) {
 			return new Card(title, subtitle, text, imgUrl);
 		}else {
 			return new Card(title, subtitle, text, imgUrl,button_title,button_url);
