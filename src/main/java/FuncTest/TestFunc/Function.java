@@ -7,7 +7,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
@@ -194,7 +193,6 @@ public class Function {
 					for (int i = 1; i < columnsNumber; ++i) {
 						String columnValue = resultSet.getString(i);
 						if (!"N\\A".equals(columnValue)) {
-							if (i > 1)
 								businessHours.put(days[i - 1], columnValue);
 						}
 					}
