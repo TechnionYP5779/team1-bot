@@ -31,24 +31,24 @@ public class Bag implements Iterable<String>{
 
 	public boolean add(String key) {
 		++size;
-		bag.put(key, !bag.containsKey(key) ? 1 : bag.get(key) + 1);
+		bag.put(key, !bag.containsKey(key) ? Integer.valueOf(1) : Integer.valueOf(bag.get(key).intValue() + 1));
 		return true;
 	}
 
 	public boolean remove(String key) {
 		if(!bag.containsKey(key))
 			return false;
-		int oldCounter = bag.get(key);
+		int oldCounter = bag.get(key).intValue();
 		if(oldCounter == 1)
 			bag.remove(key);
 		else
-			bag.put(key, oldCounter - 1);
+			bag.put(key, Integer.valueOf(oldCounter - 1));
 		return true;
 		
 	}
 	
-	public Integer getCount(String key) {
-		return !bag.containsKey(key) ? 0 : bag.get(key);
+	public int getCount(String key) {
+		return !bag.containsKey(key) ? 0 : bag.get(key).intValue();
 	}
 
 

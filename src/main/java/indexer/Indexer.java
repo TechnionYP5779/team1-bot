@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class Indexer {
 	private HashMap<String, Integer> docIds;
 	private ArrayList<String> docIdsInverted;
-	private Integer currentID = 0;
+	private Integer currentID = Integer.valueOf(0);
 	private List<HashMap<String, List<Integer>>> manyPostingLists;
 
 	Indexer() {
@@ -41,73 +41,19 @@ public class Indexer {
 		return result.stream().sorted().collect(Collectors.toList());
 	}
 
-	public void addFromFileToList(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-
-			String line;
-			for (boolean fillIndex = false; (line = br.readLine()) != null;) {
-				line = line.replaceAll("\n", "");
-				if (line.startsWith("The Index:")) {
-					fillIndex = true;
-					continue;
-				}
-				if (line.startsWith("The Doc Ids:"))
-					break;
-				if (fillIndex) {
-					String word = line.split(":")[0];
-					for (String posting : line.split(":")[1].split(" "))
-						putToList(word, Integer.parseInt(posting));
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	static Indexer buildFromFile(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-			String line;
-			boolean fillIndex = false;
-			Indexer indexer = new Indexer();
-			while ((line = br.readLine()) != null) {
-				line = line.replaceAll("\n", "");
-				if (line.startsWith("The Index:")) {
-					fillIndex = true;
-					continue;
-				}
-				if (line.startsWith("The Doc Ids:")) {
-					fillIndex = false;
-					continue;
-				}
-				if (!fillIndex) {
-					indexer.docIdsInverted.add(line);
-					indexer.docIds.put(line, ++indexer.currentID);
-				} else {
-					String word = line.split(":")[0], stringList = line.split(":")[1];
-					for (String posting : stringList.split(" "))
-						indexer.putToList(word, Integer.parseInt(posting));
-				}
-			}
-			return indexer;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	void InvertedIndex(String path) {
 		try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
 			String line;
 			while ((line = br.readLine()) != null)
 				if (line.startsWith("<DOC>"))
-					++currentID;
+					currentID = Integer.valueOf(currentID.intValue() + 1);
 				else if (!line.startsWith("<DOCNO>")) {
 					if (!line.startsWith("<"))
 						buildPostingListForOneLine(line, currentID);
 				} else {
 					String currentName = line.substring(8, line.length() - 9);
 					docIds.put(currentName, currentID);
-					docIdsInverted.add(currentID - 1, currentName);
+					docIdsInverted.add(currentID.intValue() - 1, currentName);
 				}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -201,7 +147,7 @@ public class Indexer {
 			return "\n";
 		StringBuilder stringBuilder = new StringBuilder();
 		for (Integer posting : l)
-			stringBuilder.append(docIdsInverted.get(posting - 1)).append(" ");
+			stringBuilder.append(docIdsInverted.get(posting.intValue() - 1)).append(" ");
 		String result = stringBuilder.toString();
 		return result.substring(0, result.length() - 1) + "\n";
 	}
