@@ -28,8 +28,8 @@ public class globals {
 					+ "hostNameInCertificate=*.database.windows.net;loginTimeout=30;",
 			"technobotserver.database.windows.net", "technobot", "techazure2@technobotserver", "TechnionBot1234");
 
-	public static final Object NO_VIDEO_FOUND_ERROR = "No videos where found. It could be that the course-number does represent an actual course"
-			+ ", or perhaps no video was recorded";
+	public static final Object NO_VIDEO_FOUND_ERROR = "No videos were found. It could be that the course-number does not correspond to an actual course"
+			+ ", or perhaps no video was recorded for it\n";
 	public static final int COURSE_FILTER_LIMIT = 15;
 	
 }

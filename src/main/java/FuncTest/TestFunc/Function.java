@@ -7,7 +7,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
