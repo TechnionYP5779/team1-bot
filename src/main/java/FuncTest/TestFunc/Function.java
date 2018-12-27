@@ -19,6 +19,7 @@ import homework.LoginCredentials;
 import homework.WrongCredentialsException;
 import postrequsites.PostrequisiteHandler;
 import responses.TableResponse;
+import indexer.Indexer;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -49,6 +50,8 @@ public class Function {
         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+      case globals.COURSE_GET_RECOMMENDED_BY_QUERY:
+    	  return getCourseByQuery(queryResult, s, c);
       case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
 			  return VideoAnswers.checkExists(queryResult, s, c);
       case globals.HELP_INTENT_NAME:
@@ -119,6 +122,16 @@ public class Function {
 		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
 		return jsonResult;
 
+	}
+	
+	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
+		String queryToUse = "( " + utils.getUserParam(queryResult, "recommendQuery") + " )";
+		c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
+		String response = Indexer.indexCourses(queryToUse);
+		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		return utils.createWebhookResponseContent(response, s);
 	}
 	
 	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,

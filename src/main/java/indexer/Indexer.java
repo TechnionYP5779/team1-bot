@@ -1,10 +1,22 @@
 package indexer;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+
+import com.microsoft.azure.functions.ExecutionContext;
+import com.microsoft.azure.functions.HttpRequestMessage;
+import com.microsoft.azure.functions.HttpResponseMessage;
+
+import FuncTest.TestFunc.globals;
+import FuncTest.TestFunc.utils;
 
 /**
  * Created by Yoav Zuriel on 11/7/2018.

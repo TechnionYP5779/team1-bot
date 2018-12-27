@@ -13,6 +13,7 @@ public class globals {
 	public static final String PREREQUISITES_GET_BY_NUMBER_INTENT_NAME = "technion.prerequisites.getByCourseNumber";
 	public static final String COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME = "technion.postrequisites.getByCourseName";
 	public static final String COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME = "technion.postrequisites.getByCourseNumber";
+	public static final String COURSE_GET_RECOMMENDED_BY_QUERY = "technion.recommend.index";
 	public static final String TEST_INTENT = "testIntent";
 	public static final String HELP_INTENT_NAME = "technion.help";
 	// other globals
