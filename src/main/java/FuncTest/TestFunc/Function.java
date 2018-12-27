@@ -15,6 +15,7 @@ import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
 import google.tasks.GoogleTasksAPI;
+import help.BotFeaturesInfo;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
@@ -50,7 +51,12 @@ public class Function {
         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+      case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
+			  return VideoAnswers.checkExists(queryResult, s, c);
+      case globals.HELP_INTENT_NAME:
+          return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
 		}
+		
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
 
@@ -93,16 +99,16 @@ public class Function {
 		}
 	}
 
-	private StringBuilder parseFilterResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
+	private StringBuilder parseFilterResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
 		c.getLogger().info("=========== MAKING RESULTS ===========");
 		try {
-			for (int count = 1; resultSet.next() & count <= globals.COURSE_FILTER_LIMIT;) {
-				jsonResult.append(count + " - " + resultSet.getString(1) + " (" +
-			resultSet.getString(2) + ")\n");
+			for (int count = 1; s.next() & count <= globals.COURSE_FILTER_LIMIT;) {
+				jsonResult.append(count + " - " + s.getString(1) + " (" +
+			s.getString(2) + ")\n");
 				++count;
 			}
 			
-			if(resultSet.next()) //more answers to be read after reading limit
+			if(s.next()) //more answers to be read after reading limit
 				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
 						+ "To narrow your search please add parameters)");
 			
@@ -159,16 +165,16 @@ public class Function {
 		}
 	}
 	
-	private void parsePrerequisitesResults(ResultSet resultSet, StringBuilder jsonResult, ExecutionContext c) {
+	private void parsePrerequisitesResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
 		try {
-			resultSet.next();
-			String pre = resultSet.getString(1);
+			s.next();
+			String pre = s.getString(1);
 			c.getLogger().info(pre);
-			Integer count = 1;
+			int count = 1;
 			String allOptions[] = pre.split("(\\|)");
 			for(String opt : allOptions) {
 				String anOption[] = opt.split("(&)");
-				jsonResult.append(count.toString() + ") ");
+				jsonResult.append(count + ") ");
 				for(String course : anOption)
 					jsonResult.append(course + " AND ");
 				jsonResult.delete(jsonResult.length() - 5, jsonResult.length() - 1);
@@ -177,7 +183,7 @@ public class Function {
 			}
 			jsonResult.delete(jsonResult.length() - 4, jsonResult.length() - 1);
 			c.getLogger().info(jsonResult.toString());
-			assert !resultSet.next();
+			assert !s.next();
 		} catch (SQLException e) {
 			throw new RuntimeException();
 		}
