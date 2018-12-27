@@ -147,7 +147,7 @@ public class CourseSimularitySearcher {
 		return formatList(new CourseSimularitySearcher().initCourses().courseLikelihood(courseNumber, limit));
 	}
 
-	public static void main(String[] args) {
-		System.out.println(searchSimilarCourses(Integer.valueOf(234123), 3));
-	}
+//	public static void main(String[] args) {
+//		System.out.println(searchSimilarCourses(Integer.valueOf(234123), 3));
+//	}
 }
