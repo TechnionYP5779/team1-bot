@@ -9,6 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.microsoft.azure.functions.ExecutionContext;
+
 import FuncTest.TestFunc.globals;
 
 /**
@@ -43,17 +45,17 @@ public class Indexer {
 		return result.stream().sorted().collect(Collectors.toList());
 	}
 
-	void InvertedIndex() {
-		String query = "SELECT * FROM DBO.RECOMMENDATIONS";
+	void InvertedIndex(ExecutionContext c) {
+		String query = "SELECT * FROM dbo.recommendations";
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
-			if (!resultSet.isBeforeFirst())
+			if (!resultSet.isBeforeFirst()) {
 				throw new AssertionError("The Description Table Is Empty!");
-
+			}
 			while (resultSet.next()) {
 				Integer courseNumber = Integer.valueOf(resultSet.getInt(1));
 				buildPostingListForOneLine(resultSet.getString(2), courseNumber);
-				docIdsInverted.add(courseNumber.intValue() -1, courseNumber.toString());
+				docIdsInverted.add(courseNumber.toString());
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("DB Error");
@@ -143,7 +145,7 @@ public class Indexer {
 			return "\n";
 		StringBuilder stringBuilder = new StringBuilder();
 		for (Integer posting : l)
-			stringBuilder.append(docIdsInverted.get(posting.intValue() - 1)).append(" ");
+			stringBuilder.append(posting).append(" ");
 		String result = stringBuilder.toString();
 		return result.substring(0, result.length() - 1) + "\n";
 	}
@@ -152,9 +154,9 @@ public class Indexer {
 		return printPostingList(queryParsing(query));
 	}
 	
-	public static String indexCourses(String query) {
+	public static String indexCourses(String query, ExecutionContext c) {
 		Indexer indexer = new Indexer();
-		indexer.InvertedIndex();
+		indexer.InvertedIndex(c);
 		return indexer.BooleanRetrieval(query);
 	}
 

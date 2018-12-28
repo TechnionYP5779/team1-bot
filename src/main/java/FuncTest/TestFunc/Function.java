@@ -133,7 +133,7 @@ public class Function {
 		c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
 		String queryToUse = "( " + utils.getUserParam(queryResult, "recommendQuery") + " )";
 		c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
-		String response = Indexer.indexCourses(queryToUse);
+		String response = Indexer.indexCourses(queryToUse, c);
 		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
 		String botAnswer = "Courses that deal with " + queryToUse + " are:\n" + response;
 		return utils.createWebhookResponseContent(botAnswer, s);
