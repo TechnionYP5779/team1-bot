@@ -24,6 +24,9 @@ import postrequsites.PostrequisiteHandler;
 import responses.CardBuilder;
 import responses.CardResponse;
 import responses.TableResponse;
+import rule.RunRulesHandler;
+import rule.loginHandler;
+import rule.subscribeHandler;
 import indexer.Indexer;
 import indexer.CourseSimularitySearcher;
 
@@ -40,6 +43,12 @@ public class Function {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
+			case globals.LOGIN_INTENT:
+				return checkLoginDetails(queryResult, s, c);
+			case globals.SUBSCRIBE_INTENT:
+				return subscribeToSystem(queryResult,s,c);
+			case globals.RUN_RULES_INTENT:
+				return applyRules(queryResult, s, c);
       case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
         return getHourByDay(queryResult, s, c);
       case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
@@ -69,6 +78,42 @@ public class Function {
 		}
 
 		return utils.createWebhookResponseContent("what is this intent?", s);
+	}
+	
+	private HttpResponseMessage applyRules(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		String uname = utils.getStringUserParamFromContext(queryResult, "username");
+		String passwd = utils.getStringUserParamFromContext(queryResult, "password");
+		
+		//c.getLogger().info("================ username = " + uname + "================");
+		//c.getLogger().info("================ password = " + passwd + "================");
+		
+		return new RunRulesHandler(uname, passwd).runHomeworkRules(s,c);
+	}
+
+	private HttpResponseMessage subscribeToSystem(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			final ExecutionContext c) {
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		List<String> requiredParameterNames = Arrays.asList("username", "password");
+		
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+			return utils.createWebhookResponseContent("Please enter user credentials to subscribe with.", s);
+		
+		return utils.createWebhookResponseContent(
+				(new subscribeHandler(parameters.getString("username"),parameters.getString("password"))).subscribe(c), s);
+	}
+	
+	private HttpResponseMessage checkLoginDetails(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			final ExecutionContext c)
+	{
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+		List<String> requiredParameterNames = Arrays.asList("username", "password");
+		
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+			return utils.createWebhookResponseContent("Missing username. Please choose a user to log in", s);
+		
+		return utils.createWebhookResponseContent(
+				(new loginHandler(parameters.getString("username"), parameters.getString("password"))).checkDetailsExist(), s);
 	}
 
 	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,
@@ -107,30 +152,6 @@ public class Function {
 		return response;
 	}
 
-	private StringBuilder parseFilterResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
-		c.getLogger().info("=========== MAKING RESULTS ===========");
-		try {
-			for (int count = 1; s.next() & count <= globals.COURSE_FILTER_LIMIT;) {
-				jsonResult.append(count + " - " + s.getString(1) + " (" +
-			s.getString(2) + ")\n");
-				++count;
-			}
-			
-			if(s.next()) //more answers to be read after reading limit
-				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
-						+ "To narrow your search please add parameters)");
-			
-			
-		} catch (SQLException e) {
-			c.getLogger().info("=========== " + e.getMessage() + " ===========");
-			throw new RuntimeException();
-		}
-		
-		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
-		return jsonResult;
-
-	}
-	
 	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
 		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
@@ -231,7 +252,6 @@ public class Function {
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c) {
-		c.getLogger().info("=========== GET HOUR BY WEEK ===========");
 		JSONObject parameters = queryResult.getJSONObject("parameters");
 		String bname = "";
 		if (!parameters.has("Business"))
@@ -327,9 +347,10 @@ public class Function {
 		List<String> requiredParameterNames = new ArrayList<>();
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
-			return utils.createWebhookResponseContent("Missing parametrs. Please report this", s);
 
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+			return utils.createWebhookResponseContent("Missing parameters. Please report this", s);
+		
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {

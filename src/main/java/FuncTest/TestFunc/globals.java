@@ -9,6 +9,9 @@ public class globals {
 	public static final String FILTER_COURSES_INTENT_NAME = "technion.courses.filter - examA";
 	public static final String FINISH_DEGREE_INTENT_NAME = "technion.degree.helpFinish";
 	public static final String HOMEWORK_GET_UPCOMING_INTENT_NAME = "technion.homework.getUpcomingWithContext";
+	public static final String LOGIN_INTENT = "technion.login";
+	public static final String SUBSCRIBE_INTENT = "technion.rules.subscribe";
+	public static final String RUN_RULES_INTENT = "technion.rules.run";
 	public static final String VIDEOS_CHECK_EXISTS_INTENT_NAME = "technion.courses.video.checkexistance";
 	public static final String PREREQUISITES_GET_BY_NAME_INTENT_NAME = "technion.prerequisites.getByCourseName";
 	public static final String PREREQUISITES_GET_BY_NUMBER_INTENT_NAME = "technion.prerequisites.getByCourseNumber";
@@ -21,6 +24,7 @@ public class globals {
 	// other globals
 	public static final String NO_BUSINESS_FOUND_ERROR = "No such business found. If this is an error please contact technionbot1@gmail.com";
 	public static final String MISSING_BUSINESS_PARAM = "Please choose a business to look into\n";
+	public static final String UNKNOWN_USERNAME = "No user with this username was found. Please retry.";
 	public static final String MISSING_DAY_PARAM = "Please specify a day\n";
 	public static final String GENERIC_ERR_MSG = "I'm sorry, something went wrong";
 	public static final String SERVER_ERROR = "Server error, please try again at a later date";
