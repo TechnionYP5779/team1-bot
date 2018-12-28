@@ -43,7 +43,7 @@ public class Function {
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
 			case globals.LOGIN_INTENT:
-				return checkLoginName(queryResult, s, c);
+				return checkLoginDetails(queryResult, s, c);
 			case globals.SUBSCRIBE_INTENT:
 				return subscribeToSystem(queryResult,s,c);
 			case globals.RUN_RULES_INTENT:
@@ -79,12 +79,11 @@ public class Function {
 	
 	private HttpResponseMessage applyRules(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
-		// TODO Auto-generated method stub
 		String uname = utils.getStringUserParamFromContext(queryResult, "username");
 		String passwd = utils.getStringUserParamFromContext(queryResult, "password");
 		
-		c.getLogger().info("================ username = " + uname + "================");
-		c.getLogger().info("================ password = " + passwd + "================");
+		//c.getLogger().info("================ username = " + uname + "================");
+		//c.getLogger().info("================ password = " + passwd + "================");
 		
 		return new RunRulesHandler(uname, passwd).runHomeworkRules(s,c);
 	}
@@ -101,7 +100,7 @@ public class Function {
 				(new subscribeHandler(parameters.getString("username"),parameters.getString("password"))).subscribe(c), s);
 	}
 	
-	private HttpResponseMessage checkLoginName(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+	private HttpResponseMessage checkLoginDetails(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c)
 	{
 		JSONObject parameters = queryResult.getJSONObject("parameters");
@@ -111,7 +110,7 @@ public class Function {
 			return utils.createWebhookResponseContent("Missing username. Please choose a user to log in", s);
 		
 		return utils.createWebhookResponseContent(
-				(new loginHandler(parameters.getString("username"), parameters.getString("password"))).checkUserNameExists(), s);
+				(new loginHandler(parameters.getString("username"), parameters.getString("password"))).checkDetailsExist(), s);
 	}
 
 	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,
@@ -150,30 +149,6 @@ public class Function {
 		return response;
 	}
 
-	private StringBuilder parseFilterResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
-		c.getLogger().info("=========== MAKING RESULTS ===========");
-		try {
-			for (int count = 1; s.next() & count <= globals.COURSE_FILTER_LIMIT;) {
-				jsonResult.append(count + " - " + s.getString(1) + " (" +
-			s.getString(2) + ")\n");
-				++count;
-			}
-			
-			if(s.next()) //more answers to be read after reading limit
-				jsonResult.append("(only showing first " + globals.COURSE_FILTER_LIMIT + " results."
-						+ "To narrow your search please add parameters)");
-			
-			
-		} catch (SQLException e) {
-			c.getLogger().info("=========== " + e.getMessage() + " ===========");
-			throw new RuntimeException();
-		}
-		
-		c.getLogger().info("=========== RESULTS: " + jsonResult.toString() +  " ===========");
-		return jsonResult;
-
-	}
-	
 	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
 		c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
