@@ -1,22 +1,24 @@
 package indexer;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import FuncTest.TestFunc.globals;
+
 /**
  * Created by Yoav Zuriel on 11/7/2018.
  */
 public class Indexer {
-	private HashMap<String, Integer> docIds;
 	private ArrayList<String> docIdsInverted;
-	private Integer currentID = Integer.valueOf(0);
 	private List<HashMap<String, List<Integer>>> manyPostingLists;
 
 	Indexer() {
-		this.docIds = new HashMap<>();
 		this.docIdsInverted = new ArrayList<>();
 		this.manyPostingLists = new ArrayList<>();
 		for (int i = 0; i < 27; ++i)
@@ -41,22 +43,20 @@ public class Indexer {
 		return result.stream().sorted().collect(Collectors.toList());
 	}
 
-	void InvertedIndex(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
-			String line;
-			while ((line = br.readLine()) != null)
-				if (line.startsWith("<DOC>"))
-					currentID = Integer.valueOf(currentID.intValue() + 1);
-				else if (!line.startsWith("<DOCNO>")) {
-					if (!line.startsWith("<"))
-						buildPostingListForOneLine(line, currentID);
-				} else {
-					String currentName = line.substring(8, line.length() - 9);
-					docIds.put(currentName, currentID);
-					docIdsInverted.add(currentID.intValue() - 1, currentName);
-				}
-		} catch (IOException e) {
-			e.printStackTrace();
+	void InvertedIndex() {
+		String query = "SELECT * FROM DBO.RECOMMENDATIONS";
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (!resultSet.isBeforeFirst())
+				throw new AssertionError("The Description Table Is Empty!");
+
+			while (resultSet.next()) {
+				Integer courseNumber = Integer.valueOf(resultSet.getInt(1));
+				buildPostingListForOneLine(resultSet.getString(2), courseNumber);
+				docIdsInverted.add(courseNumber.intValue() -1, courseNumber.toString());
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("DB Error");
 		}
 	}
 
@@ -87,10 +87,6 @@ public class Indexer {
 			stringBuilder.append(posting).append(" ");
 		String result = stringBuilder.toString();
 		return result.substring(0, result.length() - 1) + "\n";
-	}
-
-	Integer getDocIdByName(String name) {
-		return docIds.get(name);
 	}
 
 	private List<Integer> opPerform(String op, String term1, String term2) {
@@ -158,8 +154,7 @@ public class Indexer {
 	
 	public static String indexCourses(String query) {
 		Indexer indexer = new Indexer();
-		String baseDir = "src/main/java/indexer/", path = baseDir + "Descriptions.txt";
-		indexer.InvertedIndex(path);
+		indexer.InvertedIndex();
 		return indexer.BooleanRetrieval(query);
 	}
 
