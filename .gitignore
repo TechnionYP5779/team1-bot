@@ -33,5 +33,6 @@ hs_err_pid*
 local.settings.json
 bin/
 obj/
+tokens/
 
 .classpath

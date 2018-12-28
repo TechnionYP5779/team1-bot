@@ -7,18 +7,24 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
 
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import degree.CatalogChecker;
+import courses.videos.VideoAnswers;
 import help.BotFeaturesInfo;
 import homework.HomeworkGetter;
 import homework.LoginCredentials;
 import homework.WrongCredentialsException;
 import postrequsites.PostrequisiteHandler;
+import responses.CardBuilder;
+import responses.CardResponse;
 import responses.TableResponse;
+import indexer.Indexer;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -49,12 +55,16 @@ public class Function {
         return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
       case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+      case globals.COURSE_GET_RECOMMENDED_BY_QUERY:
+    	  return getCourseByQuery(queryResult, s, c);
       case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
 			  return VideoAnswers.checkExists(queryResult, s, c);
       case globals.HELP_INTENT_NAME:
           return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
+      case globals.FINISH_DEGREE_INTENT_NAME:
+			    return calculateDegreeProgress(queryResult, s, c);
 		}
-		
+
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
 
@@ -66,9 +76,9 @@ public class Function {
 		Integer lectureHours = utils.getIntUserParamFromContext(queryResult, "lectureHours");
 		Integer tutorialHours = utils.getIntUserParamFromContext(queryResult, "tutorialHours");
 		String dateA[] = utils.getDateRange(queryResult, "date-period");
-		
+
 		String query = utils.buildFilteringQuery(facultyName, lectureHours, tutorialHours, dateA);
-		StringBuilder jsonResult = new StringBuilder();
+		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 
 		c.getLogger().info("=========== FACULTY IS " + facultyName + " ===========");
 		c.getLogger().info("=========== lectureHours IS " + lectureHours + " ===========");
@@ -80,21 +90,18 @@ public class Function {
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
 			if (!resultSet.isBeforeFirst()) {
 				c.getLogger().info("=========== NO RESULTS ===========");
-				jsonResult.append(globals.NO_COURSES_FOUND_ERROR);
+				response = utils.createWebhookResponseContent(globals.NO_COURSES_FOUND_ERROR, s);
 			} else {
 				c.getLogger().info("=========== FOUND RESULTS ===========");
-				jsonResult.append("Here's what I found:\n");
-				jsonResult = parseFilterResults(resultSet, jsonResult, c);
+				response = TableResponse.quaryTableResponse(s, "Here's what I found:", resultSet);
 			}
-			
+
 			connection.close();
-			c.getLogger().info("=========== RETURNING RESULTS ===========");
-			return utils.createWebhookResponseContent(jsonResult.toString(), s);
-			
 		} catch (Exception e) {
 			c.getLogger().info("=========== " + e.getMessage() + " ===========");
-			throw new RuntimeException();
+			response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		}
+		return response;
 	}
 
 	private StringBuilder parseFilterResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
@@ -121,6 +128,17 @@ public class Function {
 
 	}
 	
+	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
+		String queryToUse = "( " + utils.getUserParam(queryResult, "recommendQuery") + " )";
+		c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
+		String response = Indexer.indexCourses(queryToUse);
+		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		String botAnswer = "Courses that deal with " + queryToUse + " are:\n" + response;
+		return utils.createWebhookResponseContent(botAnswer, s);
+	}
+	
 	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
 		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
@@ -141,7 +159,7 @@ public class Function {
 			throw new RuntimeException();
 		}
 	}
-	
+
 	private HttpResponseMessage getCoursesPrerequisitesByNumber(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
 		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
@@ -162,7 +180,7 @@ public class Function {
 			throw new RuntimeException();
 		}
 	}
-	
+
 	private void parsePrerequisitesResults(ResultSet s, StringBuilder jsonResult, ExecutionContext c) {
 		try {
 			s.next();
@@ -170,10 +188,10 @@ public class Function {
 			c.getLogger().info(pre);
 			int count = 1;
 			String allOptions[] = pre.split("(\\|)");
-			for(String opt : allOptions) {
+			for (String opt : allOptions) {
 				String anOption[] = opt.split("(&)");
 				jsonResult.append(count + ") ");
-				for(String course : anOption)
+				for (String course : anOption)
 					jsonResult.append(course + " AND ");
 				jsonResult.delete(jsonResult.length() - 5, jsonResult.length() - 1);
 				jsonResult.append("\nOR\n");
@@ -196,34 +214,39 @@ public class Function {
 			return utils.createWebhookResponseContent(globals.MISSING_BUSINESS_PARAM, s);
 		bname = parameters.getString("Business");
 		Connection connection = null;
-		StringBuilder jsonResult = new StringBuilder();
+		StringBuilder openingHours = new StringBuilder();
+		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
-			String selectSql = "SELECT Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday FROM Businesses"
+			String selectSql = "SELECT Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,ImageUrl FROM Businesses"
 					+ " WHERE CHARINDEX('" + bname + "',BusinessName) != 0";
 			try (Statement statement = connection.createStatement();
 					ResultSet resultSet = statement.executeQuery(selectSql)) {
 				if (!resultSet.isBeforeFirst())
-					jsonResult.append(globals.NO_BUSINESS_FOUND_ERROR);
+					response = utils.createWebhookResponseContent(globals.NO_BUSINESS_FOUND_ERROR, s);
 				else {
-					jsonResult.append(bname + " is open on:\n");
+					openingHours.append("The business hours of " + bname + " are:\n");
 					ResultSetMetaData rsmd = resultSet.getMetaData();
-					for (int columnsNumber = rsmd.getColumnCount(); resultSet.next();)
-						for (int i = 1; i <= columnsNumber; ++i) {
-							String columnValue = resultSet.getString(i);
-							if (!"N\\A".equals(columnValue)) {
-								if (i > 1)
-									jsonResult.append("\n");
-								jsonResult.append("Between " + columnValue + " on " + rsmd.getColumnName(i) + "s");
-							}
+					resultSet.next();
+					int columnsNumber = rsmd.getColumnCount();
+					String[] days = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday".split(",");
+					Map<String, String> businessHours = new HashMap<>();
+					for (int i = 1; i < columnsNumber; ++i) {
+						String columnValue = resultSet.getString(i);
+						if (!"N\\A".equals(columnValue)) {
+							businessHours.put(days[i - 1], columnValue);
 						}
+					}
+					response = TableResponse.businessHoursTableResponse(s, bname, businessHours,
+							resultSet.getString(resultSet.findColumn("ImageUrl")));
 				}
 				connection.close();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		}
-		return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		return response;
 	}
 
 	private HttpResponseMessage getHourByDay(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
@@ -241,28 +264,36 @@ public class Function {
 			return utils.createWebhookResponseContent("I'm sorry I don't know what day you mean\n", s);
 
 		Connection connection = null;
-		StringBuilder jsonResult = new StringBuilder();
+		StringBuilder openingHours = new StringBuilder();
+		CardBuilder cb = new CardBuilder();
+		HttpResponseMessage response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		try {
 			connection = DriverManager.getConnection(globals.CONNECTION_STRING);
-			String selectSql = "SELECT BusinessName, " + day + " FROM BUSINESSES WHERE CHARINDEX('" + bname
+			String selectSql = "SELECT BusinessName, " + day + ",ImageUrl FROM BUSINESSES WHERE CHARINDEX('" + bname
 					+ "', BusinessName) != 0";
 			try (Statement statement = connection.createStatement();
 					ResultSet resultSet = statement.executeQuery(selectSql)) {
 				if (!resultSet.isBeforeFirst())
-					jsonResult.append(globals.NO_BUSINESS_FOUND_ERROR);
+					response = utils.createWebhookResponseContent(globals.NO_BUSINESS_FOUND_ERROR, s);
 				else
-					while (resultSet.next())
-						jsonResult.append(("N\\A".equals(resultSet.getString(2))
+					while (resultSet.next()) {
+						openingHours.append(("N\\A".equals(resultSet.getString(2))
 								? resultSet.getString(1) + " is not open on " + day
 								: "The " + resultSet.getString(1) + " is open between " + resultSet.getString(2)
 										+ " on " + day)
 								+ "s");
+						cb.setTitle(bname);
+						cb.setText(openingHours.toString());
+						cb.setImgUrl(resultSet.getString(resultSet.findColumn("ImageUrl")));
+						response = CardResponse.generate(s, openingHours.toString(), cb.build());
+					}
 				connection.close();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			response = utils.createWebhookResponseContent(globals.SERVER_ERROR, s);
 		}
-		return utils.createWebhookResponseContent(jsonResult.toString(), s);
+		return response;
 	}
 
 	private HttpResponseMessage getUpcomingHomework(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
@@ -281,6 +312,30 @@ public class Function {
 			return TableResponse.homeworkTableResponse(s, homework.getUpcomingHomework());
 		} catch (WrongCredentialsException e) {
 			return utils.createWebhookResponseContent("Wrong credentials, please try again", s);
+		}
+	}
+
+	private HttpResponseMessage calculateDegreeProgress(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		c.getLogger().info("=========== FINISH DEGREE INTENT ===========");
+		JSONObject parameters = queryResult.getJSONObject("parameters");
+
+		if (!utils.allParametersArePresent(parameters, Arrays.asList("ID", "code")))
+			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
+
+		String ID = parameters.getString("ID"), code = parameters.getString("code");
+
+		c.getLogger().info("================== ID = " + ID + "====================");
+		c.getLogger().info("================== code = " + code + "====================");
+
+		LoginCredentials lc = new LoginCredentials(ID, code);
+		CatalogChecker cc = new CatalogChecker(c, lc);
+
+		try {
+			return utils.createWebhookResponseContent(cc.degreeCompletionCompute(), s);
+		} catch (SQLException e) {
+			c.getLogger().info("==================" + e.getMessage() + "====================");
+			return utils.createWebhookResponseContent(globals.GENERIC_ERR_MSG, s);
 		}
 	}
 
