@@ -66,7 +66,7 @@ public class CourseSimularitySearcher {
 	public CourseSimularitySearcher initCourses() {
 		initStopwords();
 
-		String query = "SELECT * FROM DBO.COURSEDESCRIPTION";
+		String query = "SELECT * FROM dbo.recommendations";
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
 			if (!resultSet.isBeforeFirst())
@@ -80,19 +80,6 @@ public class CourseSimularitySearcher {
 		} catch (Exception e) {
 			throw new RuntimeException("DB Error");
 		}
-
-//			try (BufferedReader br = new BufferedReader(new FileReader(new File(descPath)))) {
-//				String line;
-//				Integer courseNumber = Integer.valueOf(-1);
-//				while ((line = br.readLine()) != null)
-//					if (!line.startsWith("<DOCNO>")) {
-//						if (!line.startsWith("<"))
-//							parseLine(courseNumber, line);
-//					} else {
-//						courseNumber = Integer.valueOf(Integer.parseInt(line.substring(8, line.length() - 9)));
-//						this.coursesSyllabi.put(courseNumber, new BagOfWords());
-//					}
-//			}
 		return this;
 	}
 
