@@ -133,11 +133,11 @@ public class Function {
 	
 	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
-		c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
+		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
 		String queryToUse = "( " + utils.getUserParam(queryResult, "recommendQuery") + " )";
-		c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
+		//c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
 		String response = Indexer.indexCourses(queryToUse, c);
-		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
 		String botAnswer = "Courses that deal with " + queryToUse + " are:";
 		int count = 1;
 		for (String word : response.split(" ")) {
@@ -149,11 +149,11 @@ public class Function {
 	
 	private HttpResponseMessage getRecommendedBuNumber(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
-		c.getLogger().info("=========== GET RECOMMENDED COURSES BY NUMBER ===========");
+		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY NUMBER ===========");
 		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
-		c.getLogger().info("=========== COURSE NUMBER IS " + courseNumber + " ===========");
+		//c.getLogger().info("=========== COURSE NUMBER IS " + courseNumber + " ===========");
 		String response = CourseSimularitySearcher.searchSimilarCourses(courseNumber, 5);
-		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
 		String botAnswer = "You will probably enjoy these courses:";
 		int count = 1;
 		for (String word : response.split(" ")) {
