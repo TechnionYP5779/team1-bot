@@ -25,6 +25,7 @@ import responses.CardBuilder;
 import responses.CardResponse;
 import responses.TableResponse;
 import indexer.Indexer;
+import indexer.CourseSimularitySearcher;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -57,6 +58,8 @@ public class Function {
         return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
       case globals.COURSE_GET_RECOMMENDED_BY_QUERY:
     	  return getCourseByQuery(queryResult, s, c);
+      case globals.COURSE_GET_RECOMMENDED_BY_COURSE_NUMBER:
+    	  return getRecommendedBuNumber(queryResult, s, c);
       case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
 			  return VideoAnswers.checkExists(queryResult, s, c);
       case globals.HELP_INTENT_NAME:
@@ -130,12 +133,33 @@ public class Function {
 	
 	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
-		c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
+		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
 		String queryToUse = "( " + utils.getUserParam(queryResult, "recommendQuery") + " )";
-		c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
-		String response = Indexer.indexCourses(queryToUse);
-		c.getLogger().info("=========== RESPONSE IS" + response + "===========");
-		String botAnswer = "Courses that deal with " + queryToUse + " are:\n" + response;
+		//c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
+		String response = Indexer.indexCourses(queryToUse, c);
+		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		String botAnswer = "Courses that deal with " + queryToUse + " are:";
+		int count = 1;
+		for (String word : response.split(" ")) {
+			botAnswer = botAnswer + "\n" + count + ") " + word;
+			++count;
+		}
+		return utils.createWebhookResponseContent(botAnswer, s);
+	}
+	
+	private HttpResponseMessage getRecommendedBuNumber(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
+			ExecutionContext c) {
+		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY NUMBER ===========");
+		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
+		//c.getLogger().info("=========== COURSE NUMBER IS " + courseNumber + " ===========");
+		String response = CourseSimularitySearcher.searchSimilarCourses(courseNumber, 5);
+		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		String botAnswer = "You will probably enjoy these courses:";
+		int count = 1;
+		for (String word : response.split(" ")) {
+			botAnswer = botAnswer + "\n" + count + ") " + word;
+			++count;
+		}
 		return utils.createWebhookResponseContent(botAnswer, s);
 	}
 	
