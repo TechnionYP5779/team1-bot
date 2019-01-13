@@ -152,17 +152,51 @@ public class Function {
 		return response;
 	}
 
+	private static StringBuilder getNamesByNums(String numbers, ExecutionContext c) {
+		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
+			StringBuilder result = new StringBuilder("");
+			StringBuilder list = new StringBuilder("(");
+			for (String courseNum : numbers.split(" ")) {
+				list.append(courseNum + ",");
+			}
+			list.setCharAt(list.length()-2, ')');
+			list.deleteCharAt(list.length()-1);
+			String query = "SELECT id,name FROM dbo.Courses WHERE (id IN " + list + ")";
+			ResultSet resultSet = connection.createStatement().executeQuery(query);
+			if (!resultSet.isBeforeFirst()) {
+				throw new AssertionError("No courses were found...");
+			}
+			while (resultSet.next()) {
+				Integer courseNumber = Integer.valueOf(resultSet.getInt(1));
+				String courseName = resultSet.getString(2);
+				result.append(courseNumber.toString() + ":" + courseName + ",");
+			}
+			connection.close();
+			return result;
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
+	}
+	
+	
 	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
 		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
-		String queryToUse = "( " + utils.getUserParam(queryResult, "recommendQuery") + " )";
+		String initQ = utils.getUserParam(queryResult, "recommendQuery");
+		String queryToUse = "( " + initQ + " )";
 		//c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
 		String response = Indexer.indexCourses(queryToUse, c);
 		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
-		String botAnswer = "Courses that deal with " + queryToUse + " are:";
+		String botAnswer = "Courses that deal with '" + initQ + "' are:";
 		int count = 1;
-		for (String word : response.split(" ")) {
-			botAnswer = botAnswer + "\n" + count + ") " + word;
+		StringBuilder finalRes = getNamesByNums(response, c);
+		for (String course : finalRes.toString().split(",")) {
+			//c.getLogger().info("=========== COURSE: " + course + "===========");
+			String num = course.split(":")[0];
+			//c.getLogger().info("=========== NUM: " + num + "===========");
+			String name = course.split(":")[1];
+			//c.getLogger().info("=========== NAME: " + name + "===========");
+			botAnswer = botAnswer + "\n" + count + ") " + num + " | " + name;
 			++count;
 		}
 		return utils.createWebhookResponseContent(botAnswer, s);
@@ -177,8 +211,14 @@ public class Function {
 		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
 		String botAnswer = "You will probably enjoy these courses:";
 		int count = 1;
-		for (String word : response.split(" ")) {
-			botAnswer = botAnswer + "\n" + count + ") " + word;
+		StringBuilder finalRes = getNamesByNums(response, c);
+		for (String course : finalRes.toString().split(",")) {
+			//c.getLogger().info("=========== COURSE: " + course + "===========");
+			String num = course.split(":")[0];
+			//c.getLogger().info("=========== NUM: " + num + "===========");
+			String name = course.split(":")[1];
+			//c.getLogger().info("=========== NAME: " + name + "===========");
+			botAnswer = botAnswer + "\n" + count + ") " + num + " | " + name;
 			++count;
 		}
 		return utils.createWebhookResponseContent(botAnswer, s);
@@ -186,11 +226,11 @@ public class Function {
 	
 	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
-		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
+		//c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
 		String courseName = utils.getUserParam(queryResult, "courseName"),
 				query = utils.buildPrerequisitesQueryByName(courseName);
-		c.getLogger().info("=========== COURSE NAME IS " + courseName + " ===========");
-		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		//c.getLogger().info("=========== COURSE NAME IS " + courseName + " ===========");
+		//c.getLogger().info("=========== QUERY IS " + query + " ===========");
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			StringBuilder jsonResult = new StringBuilder();
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
@@ -207,11 +247,11 @@ public class Function {
 
 	private HttpResponseMessage getCoursesPrerequisitesByNumber(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
-		c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
+		//c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
 		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
-		c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
+		//c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
 		String query = utils.buildPrerequisitesQueryByNumber(courseNumber);
-		c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		//c.getLogger().info("=========== QUERY IS " + query + " ===========");
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			StringBuilder jsonResult = new StringBuilder();
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
@@ -248,6 +288,46 @@ public class Function {
 		} catch (SQLException e) {
 			throw new RuntimeException();
 		}
+//		try {
+//			s.next();
+//			String pre = s.getString(1);
+//			c.getLogger().info(pre);
+//			int count = 1;
+//			String numbers = "";
+//			String allOptions[] = pre.split("(\\|)");
+//			for (String opt : allOptions) {
+//				String anOption[] = opt.split("(&)");
+//				for (String course : anOption)
+//					numbers += course + " ";
+//			}
+//			c.getLogger().info("=========== NUMBERS: " + numbers + " ===========");
+//			StringBuilder results = (getNamesByNums(numbers, c));
+//			results.deleteCharAt(results.length()-1);
+//			c.getLogger().info("=========== COURSES " + results + " ===========");
+//			int index = 0;
+//			for (String opt : allOptions) {
+//				String anOption[] = opt.split("(&)");
+//				jsonResult.append(count + ") ");
+//				for (String _ : anOption) {
+//					String courseWhole = results.toString().split(",")[index];
+//					courseWhole.replaceFirst(":", " | ");
+//					jsonResult.append(courseWhole + " AND ");
+//					c.getLogger().info("=========== WHOLE " + courseWhole + " ===========");
+//					++index;
+//				}
+//				c.getLogger().info("=========== BEF " + jsonResult.toString() + " ===========");
+//				jsonResult.delete(jsonResult.length() - 5, jsonResult.length() - 1);
+//				c.getLogger().info("=========== AFT " + jsonResult.toString() + " ===========");
+//				jsonResult.append("\nOR\n");
+//				++count;
+//			}
+//			c.getLogger().info("=========== ALM " + jsonResult.toString() + " ===========");
+//			jsonResult.delete(jsonResult.length() - 4, jsonResult.length() - 1);
+//			c.getLogger().info("=========== FIN " + jsonResult.toString() + " ===========");
+//			assert !s.next();
+//		} catch (SQLException e) {
+//			throw new RuntimeException();
+//		}
 	}
 
 	private HttpResponseMessage getHourByWeek(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
