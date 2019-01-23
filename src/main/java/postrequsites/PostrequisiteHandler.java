@@ -43,7 +43,7 @@ public class PostrequisiteHandler {
 		}
 	}
 
-	private static Course extractCourseInfo(int courseNum) throws SQLException {
+	public static Course extractCourseInfo(int courseNum) throws SQLException {
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			PreparedStatement ps = connection.prepareStatement("Select ID,Name From Courses WHERE Courses.ID = ?;");
 			ps.setInt(1, courseNum);

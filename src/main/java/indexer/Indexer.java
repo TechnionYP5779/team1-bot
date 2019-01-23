@@ -140,7 +140,7 @@ public class Indexer {
 		return postingList1.stream().filter(x -> !postingList2.contains(x)).collect(Collectors.toList());
 	}
 
-	private String printPostingList(List<Integer> l) {
+	private static String printPostingList(List<Integer> l) {
 		if (l.isEmpty())
 			return "\n";
 		StringBuilder stringBuilder = new StringBuilder();

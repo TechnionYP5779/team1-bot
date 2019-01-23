@@ -14,6 +14,7 @@ import com.microsoft.azure.functions.*;
 import org.json.*;
 import FuncTest.TestFunc.globals;
 import FuncTest.TestFunc.utils;
+import course.review.CourseReviewHandler;
 import degree.CatalogChecker;
 import courses.videos.VideoAnswers;
 import help.BotFeaturesInfo;
@@ -43,77 +44,83 @@ public class Function {
 		c.getLogger().info("=========== WEBHOOK INVOKED ===========");
 		JSONObject queryResult = new JSONObject(s.getBody().get().toString()).getJSONObject("queryResult");
 		switch (queryResult.getJSONObject("intent").getString("displayName")) {
-			case globals.LOGIN_INTENT:
-				return checkLoginDetails(queryResult, s, c);
-			case globals.SUBSCRIBE_INTENT:
-				return subscribeToSystem(queryResult,s,c);
-			case globals.RUN_RULES_INTENT:
-				return applyRules(queryResult, s, c);
-      case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
-        return getHourByDay(queryResult, s, c);
-      case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
-        return getHourByWeek(queryResult, s, c);
-      case globals.FILTER_COURSES_INTENT_NAME:
-        return getMatchingCoursesResponse(queryResult, s, c);
-      case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
-        return getUpcomingHomework(queryResult, s, c);
-      case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
-			  return getCoursesPrerequisitesByName(queryResult, s, c);
-		  case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
-			  return getCoursesPrerequisitesByNumber(queryResult, s, c);
-      case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
-        return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
-      case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
-        return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
-      case globals.COURSE_GET_RECOMMENDED_BY_QUERY:
-    	  return getCourseByQuery(queryResult, s, c);
-      case globals.COURSE_GET_RECOMMENDED_BY_COURSE_NUMBER:
-    	  return getRecommendedBuNumber(queryResult, s, c);
-      case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
-			  return VideoAnswers.checkExists(queryResult, s, c);
-      case globals.HELP_INTENT_NAME:
-          return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
-      case globals.FINISH_DEGREE_INTENT_NAME:
-			    return calculateDegreeProgress(queryResult, s, c);
+		case globals.LOGIN_INTENT:
+			return checkLoginDetails(queryResult, s, c);
+		case globals.SUBSCRIBE_INTENT:
+			return subscribeToSystem(queryResult, s, c);
+		case globals.RUN_RULES_INTENT:
+			return applyRules(queryResult, s, c);
+		case globals.BUSINESS_HOUR_BY_DAY_INTENT_NAME:
+			return getHourByDay(queryResult, s, c);
+		case globals.BUSINESS_HOUR_WEEK_INTENT_NAME:
+			return getHourByWeek(queryResult, s, c);
+		case globals.FILTER_COURSES_INTENT_NAME:
+			return getMatchingCoursesResponse(queryResult, s, c);
+		case globals.HOMEWORK_GET_UPCOMING_INTENT_NAME:
+			return getUpcomingHomework(queryResult, s, c);
+		case globals.PREREQUISITES_GET_BY_NAME_INTENT_NAME:
+			return getCoursesPrerequisitesByName(queryResult, s, c);
+		case globals.PREREQUISITES_GET_BY_NUMBER_INTENT_NAME:
+			return getCoursesPrerequisitesByNumber(queryResult, s, c);
+		case globals.COURSE_GET_POSTREQUISITES_BY_NAME_INTENT_NAME:
+			return PostrequisiteHandler.getPostrequisitesByName(queryResult, s, c);
+		case globals.COURSE_GET_POSTREQUISITES_BY_NUMBER_INTENT_NAME:
+			return PostrequisiteHandler.getPostrequisitesByNumber(queryResult, s, c);
+		case globals.COURSE_GET_RECOMMENDED_BY_QUERY:
+			return getCourseByQuery(queryResult, s, c);
+		case globals.COURSE_GET_RECOMMENDED_BY_COURSE_NUMBER:
+			return getRecommendedBuNumber(queryResult, s, c);
+		case globals.VIDEOS_CHECK_EXISTS_INTENT_NAME:
+			return VideoAnswers.checkExists(queryResult, s, c);
+		case globals.HELP_INTENT_NAME:
+			return BotFeaturesInfo.returnInfoResponse(queryResult, s, c);
+		case globals.FINISH_DEGREE_INTENT_NAME:
+			return calculateDegreeProgress(queryResult, s, c);
+		case globals.COURSE_REVIEW_INTENT_NAME:
+			return CourseReviewHandler.addCourseReviewByNumber(queryResult, s, c);
 		}
 
 		return utils.createWebhookResponseContent("what is this intent?", s);
 	}
-	
+
 	private HttpResponseMessage applyRules(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
 		String uname = utils.getStringUserParamFromContext(queryResult, "username");
 		String passwd = utils.getStringUserParamFromContext(queryResult, "password");
-		
-		//c.getLogger().info("================ username = " + uname + "================");
-		//c.getLogger().info("================ password = " + passwd + "================");
-		
-		return new RunRulesHandler(uname, passwd).runHomeworkRules(s,c);
+
+		// c.getLogger().info("================ username = " + uname +
+		// "================");
+		// c.getLogger().info("================ password = " + passwd +
+		// "================");
+
+		return new RunRulesHandler(uname, passwd).runHomeworkRules(s, c);
 	}
 
 	private HttpResponseMessage subscribeToSystem(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			final ExecutionContext c) {
 		JSONObject parameters = queryResult.getJSONObject("parameters");
 		List<String> requiredParameterNames = Arrays.asList("username", "password");
-		
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
 			return utils.createWebhookResponseContent("Please enter user credentials to subscribe with.", s);
-		
+
 		return utils.createWebhookResponseContent(
-				(new subscribeHandler(parameters.getString("username"),parameters.getString("password"))).subscribe(c), s);
+				(new subscribeHandler(parameters.getString("username"), parameters.getString("password"))).subscribe(c),
+				s);
 	}
-	
+
 	private HttpResponseMessage checkLoginDetails(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
-			final ExecutionContext c)
-	{
+			final ExecutionContext c) {
 		JSONObject parameters = queryResult.getJSONObject("parameters");
 		List<String> requiredParameterNames = Arrays.asList("username", "password");
-		
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
 			return utils.createWebhookResponseContent("Missing username. Please choose a user to log in", s);
-		
+
 		return utils.createWebhookResponseContent(
-				(new loginHandler(parameters.getString("username"), parameters.getString("password"))).checkDetailsExist(), s);
+				(new loginHandler(parameters.getString("username"), parameters.getString("password")))
+						.checkDetailsExist(),
+				s);
 	}
 
 	private HttpResponseMessage getMatchingCoursesResponse(JSONObject queryResult,
@@ -159,8 +166,8 @@ public class Function {
 			for (String courseNum : numbers.split(" ")) {
 				list.append(courseNum + ",");
 			}
-			list.setCharAt(list.length()-2, ')');
-			list.deleteCharAt(list.length()-1);
+			list.setCharAt(list.length() - 2, ')');
+			list.deleteCharAt(list.length() - 1);
 			String query = "SELECT id,name FROM dbo.Courses WHERE (id IN " + list + ")";
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
 			if (!resultSet.isBeforeFirst()) {
@@ -177,60 +184,64 @@ public class Function {
 			throw new RuntimeException();
 		}
 	}
-	
-	
+
 	public static HttpResponseMessage getCourseByQuery(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
-		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY ===========");
+		// c.getLogger().info("=========== GET RECOMMENDED COURSES BY QUERY
+		// ===========");
 		String initQ = utils.getUserParam(queryResult, "recommendQuery");
 		String queryToUse = "( " + initQ + " )";
-		//c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
+		// c.getLogger().info("=========== QUERY IS " + queryToUse + " ===========");
 		String response = Indexer.indexCourses(queryToUse, c);
-		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		// c.getLogger().info("=========== RESPONSE IS" + response + "===========");
 		String botAnswer = "Courses that deal with '" + initQ + "' are:";
 		int count = 1;
 		StringBuilder finalRes = getNamesByNums(response, c);
 		for (String course : finalRes.toString().split(",")) {
-			//c.getLogger().info("=========== COURSE: " + course + "===========");
+			// c.getLogger().info("=========== COURSE: " + course + "===========");
 			String num = course.split(":")[0];
-			//c.getLogger().info("=========== NUM: " + num + "===========");
+			// c.getLogger().info("=========== NUM: " + num + "===========");
 			String name = course.split(":")[1];
-			//c.getLogger().info("=========== NAME: " + name + "===========");
+			// c.getLogger().info("=========== NAME: " + name + "===========");
 			botAnswer = botAnswer + "\n" + count + ") " + num + " | " + name;
 			++count;
 		}
 		return utils.createWebhookResponseContent(botAnswer, s);
 	}
-	
+
 	private HttpResponseMessage getRecommendedBuNumber(JSONObject queryResult, HttpRequestMessage<Optional<String>> s,
 			ExecutionContext c) {
-		//c.getLogger().info("=========== GET RECOMMENDED COURSES BY NUMBER ===========");
+		// c.getLogger().info("=========== GET RECOMMENDED COURSES BY NUMBER
+		// ===========");
 		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
-		//c.getLogger().info("=========== COURSE NUMBER IS " + courseNumber + " ===========");
+		// c.getLogger().info("=========== COURSE NUMBER IS " + courseNumber + "
+		// ===========");
 		String response = CourseSimularitySearcher.searchSimilarCourses(courseNumber, 5);
-		//c.getLogger().info("=========== RESPONSE IS" + response + "===========");
+		// c.getLogger().info("=========== RESPONSE IS" + response + "===========");
 		String botAnswer = "You will probably enjoy these courses:";
 		int count = 1;
 		StringBuilder finalRes = getNamesByNums(response, c);
 		for (String course : finalRes.toString().split(",")) {
-			//c.getLogger().info("=========== COURSE: " + course + "===========");
+			// c.getLogger().info("=========== COURSE: " + course + "===========");
 			String num = course.split(":")[0];
-			//c.getLogger().info("=========== NUM: " + num + "===========");
+			// c.getLogger().info("=========== NUM: " + num + "===========");
 			String name = course.split(":")[1];
-			//c.getLogger().info("=========== NAME: " + name + "===========");
+			// c.getLogger().info("=========== NAME: " + name + "===========");
 			botAnswer = botAnswer + "\n" + count + ") " + num + " | " + name;
 			++count;
 		}
 		return utils.createWebhookResponseContent(botAnswer, s);
 	}
-	
+
 	private HttpResponseMessage getCoursesPrerequisitesByName(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
-		//c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME ===========");
+		// c.getLogger().info("=========== GET COURSES PREREQUISITES BY NAME
+		// ===========");
 		String courseName = utils.getUserParam(queryResult, "courseName"),
 				query = utils.buildPrerequisitesQueryByName(courseName);
-		//c.getLogger().info("=========== COURSE NAME IS " + courseName + " ===========");
-		//c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		// c.getLogger().info("=========== COURSE NAME IS " + courseName + "
+		// ===========");
+		// c.getLogger().info("=========== QUERY IS " + query + " ===========");
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			StringBuilder jsonResult = new StringBuilder();
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
@@ -247,11 +258,12 @@ public class Function {
 
 	private HttpResponseMessage getCoursesPrerequisitesByNumber(JSONObject queryResult,
 			HttpRequestMessage<Optional<String>> s, ExecutionContext c) {
-		//c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER ===========");
+		// c.getLogger().info("=========== GET COURSES PREREQUISITES BY NUMBER
+		// ===========");
 		Integer courseNumber = Integer.valueOf(utils.getUserParam(queryResult, "courseNumber"));
-		//c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
+		// c.getLogger().info("=========== NUMBER IS " + courseNumber + " ===========");
 		String query = utils.buildPrerequisitesQueryByNumber(courseNumber);
-		//c.getLogger().info("=========== QUERY IS " + query + " ===========");
+		// c.getLogger().info("=========== QUERY IS " + query + " ===========");
 		try (Connection connection = DriverManager.getConnection(globals.CONNECTION_STRING)) {
 			StringBuilder jsonResult = new StringBuilder();
 			ResultSet resultSet = connection.createStatement().executeQuery(query);
@@ -428,9 +440,9 @@ public class Function {
 		requiredParameterNames.add("username");
 		requiredParameterNames.add("password");
 
-		if (!utils.allParametersArePresent(parameters, requiredParameterNames)) 
+		if (!utils.allParametersArePresent(parameters, requiredParameterNames))
 			return utils.createWebhookResponseContent("Missing parameters. Please report this", s);
-		
+
 		LoginCredentials lc = new LoginCredentials(parameters.getString("username"), parameters.getString("password"));
 		HomeworkGetter homework = new HomeworkGetter(lc);
 		try {
