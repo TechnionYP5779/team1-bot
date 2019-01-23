@@ -6,6 +6,10 @@ work with Java in eclipse, Dialogflow and Azure to make this happen :D
 
 [Visit our wiki page for more information](https://github.com/TechnionYP5779/team1-bot/wiki)
 
+## Our Status
+[![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/TechnionYP5779/team1-bot.svg?maxAge=100)](https://github.com/TechnionYP5779/team1-bot/issues?q=is%3Aissue+is%3Aclosed)
+[![Projects code style](https://img.shields.io/badge/code%20style-spartanized-blue.svg)]()
+
 ## Contributors
 * **Yoav Zuriel** - [Yoav's Git](https://github.com/yoavz1997/)
 * **Shai Zeevi** - [Shai's Git](https://github.com/shaizeevi/)
