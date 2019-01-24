@@ -2,7 +2,16 @@
 
 TechnionBot
 ------------------------------
-work with Java in eclipse, Dialogflow and Azure to make this happen :D
+- When does a business open tomorrow?
+- What courses match ones you like?
+- Which courses are prerequisit for Data Structues 1?
+
+The TechnionBot is the assistant to answer all your questions.
+
+## Technologies & Languages
+All the code is written in spartanized Java, with the help of the Eclipse IDE.
+The assistant intents are handled in our Dialogflow account,
+connecting these two is the webhook being done using Azure
 
 [Visit our wiki page for more information](https://github.com/TechnionYP5779/team1-bot/wiki)
 
